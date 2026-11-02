@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Check, Loader, MapPin, RotateCcw, Wallet } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Check, Loader, MapPin, Wallet } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import RolePicker from '../components/RolePicker'
-import { Avatar, Button, Input, Select, Switch, ToggleChip } from '../components/ui'
+import { Avatar, Input, Select, Switch, ToggleChip } from '../components/ui'
 import { PACES, PACE_OPTIONS, STAGE_OPTIONS } from '../lib/onboarding'
 import { useProfile, useUpdateProfile } from '../lib/profile'
 import { PACE_TARGET, WORK_MODE_LABEL, type IdealStart, type Profile as ProfileRow, type WorkMode } from '../lib/types'
-import type { OnboardingState } from './Onboarding'
 
 const START_OPTIONS = [
   { value: '', label: 'Not set' },
@@ -31,7 +29,6 @@ export default function Profile() {
   const { session } = useAuth()
   const { data: profile, isLoading } = useProfile()
   const update = useUpdateProfile()
-  const navigate = useNavigate()
   const [touched, setTouched] = useState(false)
 
   if (isLoading) return null
@@ -226,19 +223,10 @@ export default function Profile() {
           <section className={`${card} gap-4`}>
             <h2 className={h2}>Account</h2>
             <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
-              <AutosaveInput id="pf-name" label="Name" saved={profile.full_name ?? ''} onSave={(v) => save({ full_name: v.trim() || null })} />
+              {/* Starts from the same name as the header (saved name, else the one from Google sign-in). */}
+              <AutosaveInput id="pf-name" label="Name" saved={displayName} onSave={(v) => save({ full_name: v.trim() || null })} />
               {/* Changing email needs a confirmation flow; that comes with Settings (7.1). */}
               <Input id="pf-email" label="Email" type="email" value={session?.user.email ?? ''} readOnly className="text-ink-500" />
-            </div>
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={RotateCcw}
-                onClick={() => navigate('/welcome', { state: { redo: true } satisfies OnboardingState })}
-              >
-                Redo onboarding
-              </Button>
             </div>
           </section>
         </div>

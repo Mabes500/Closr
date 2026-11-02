@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, RotateCcw, type LucideIcon } from 'lucide-react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { ArrowLeft, ArrowRight, type LucideIcon } from 'lucide-react'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { Logo, Mark } from '../components/Logo'
 import RolePicker from '../components/RolePicker'
@@ -12,10 +12,8 @@ import { PACE_TARGET, type SearchStage, type WeeklyPace } from '../lib/types'
 type State = { step: number; stage: SearchStage | null; roles: string[]; pace: WeeklyPace; source: StartChoice | null }
 const BLANK: State = { step: 0, stage: null, roles: [], pace: 'steady', source: null }
 
-// /welcome. Arrives here after sign-in while profiles.onboarded_at is null, or from
-// Profile → "Redo onboarding" (location.state.redo).
-export type OnboardingState = { redo?: boolean }
-
+// /welcome. Arrives here after sign-in while profiles.onboarded_at is null.
+// Every answer can be changed later in Profile.
 // Prototype `Onboarding`: four steps, progress bar, back, skip step, skip all, Enter to
 // continue, and the "You're all set" screen. Finishing or skipping sets onboarded_at.
 export default function Onboarding() {
@@ -23,17 +21,8 @@ export default function Onboarding() {
   const { data: profile, isLoading } = useProfile()
   const update = useUpdateProfile()
   const navigate = useNavigate()
-  const redo = !!(useLocation().state as OnboardingState | null)?.redo
   const [s, setS] = useState<State>(BLANK)
-  const [seeded, setSeeded] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
-
-  // Redo starts from what's saved; a first run starts blank.
-  useEffect(() => {
-    if (seeded || !profile) return
-    if (redo) setS({ ...BLANK, stage: profile.search_stage, roles: profile.target_roles, pace: profile.weekly_pace })
-    setSeeded(true)
-  }, [profile, redo, seeded])
 
   const done = s.step >= 4
   const next = () => setS((x) => ({ ...x, step: Math.min(x.step + 1, 4) }))
@@ -51,19 +40,19 @@ export default function Onboarding() {
   useEffect(() => () => clearTimeout(timer.current), [])
 
   if (isLoading) return null
-  // Already set up and not redoing: nothing to do here.
-  if (profile?.onboarded_at && !redo && !update.isPending && !done) return <Navigate to="/" replace />
+  // Already set up: nothing to do here.
+  if (profile?.onboarded_at && !update.isPending && !done) return <Navigate to="/" replace />
 
   const first = firstName(profile, session?.user.user_metadata ?? {}, session?.user.email)
   const def = OB_STEPS[Math.min(s.step, 3)]
 
-  // Save answers and mark onboarding done (keeping the first completion date on a redo).
+  // Save answers and mark onboarding done.
   const save = (x: State) =>
     update.mutateAsync({
       search_stage: x.stage,
       target_roles: x.roles,
       weekly_pace: x.pace,
-      onboarded_at: profile?.onboarded_at ?? new Date().toISOString(),
+      onboarded_at: new Date().toISOString(),
     })
 
   async function finish() {
@@ -73,10 +62,8 @@ export default function Onboarding() {
     else navigate('/', { replace: true })
   }
 
-  // First run: keep whatever was answered and use defaults for the rest.
-  // Redo: leave the saved profile as it was.
+  // Keep whatever was answered and use defaults for the rest.
   async function skipAll() {
-    if (redo) return navigate('/profile', { replace: true })
     await save(s)
     navigate('/', { replace: true })
   }
@@ -185,11 +172,6 @@ export default function Onboarding() {
                 </div>
               </div>
               {update.error && <p className="text-center text-sm text-coral-700">{update.error.message}</p>}
-              <div className="flex justify-center">
-                <Button variant="ghost" size="sm" icon={RotateCcw} onClick={() => setS(BLANK)}>
-                  Replay onboarding
-                </Button>
-              </div>
             </div>
           )}
           {!done && update.error && <p className="text-sm text-coral-700">{update.error.message}</p>}
