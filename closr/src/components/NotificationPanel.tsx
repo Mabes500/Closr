@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AlarmClock, BellOff, Calendar, CheckCheck, X, type LucideIcon } from 'lucide-react'
+import { AlarmClock, BellOff, Calendar, CalendarCheck, CheckCheck, X, type LucideIcon } from 'lucide-react'
 import { KEEP_DAYS } from '../lib/notifications'
 import type { AppNotification, NotificationKind } from '../lib/types'
 import { Button, EmptyState, IconButton, Tabs } from './ui'
@@ -9,6 +9,7 @@ const NOTIF_KIND: Record<NotificationKind, { icon: LucideIcon; tone: string }> =
   interview: { icon: Calendar, tone: 'bg-gold-100 text-gold-800' },
   overdue: { icon: AlarmClock, tone: 'bg-coral-100 text-coral-700' },
   deadline: { icon: AlarmClock, tone: 'bg-coral-100 text-coral-700' },
+  checkin: { icon: CalendarCheck, tone: 'bg-blue-100 text-blue-700' },
 }
 
 // "5m ago", "3h ago", "2d ago" (prototype `minsAgo`).
@@ -133,8 +134,8 @@ export default function NotificationPanel({
               title={caughtUp ? "You're all caught up" : 'No notifications yet'}
               body={
                 caughtUp
-                  ? 'New interview reminders and follow-up nudges show up here.'
-                  : 'Interview reminders, follow-up nudges and deadlines will land here.'
+                  ? 'New interview reminders, follow-up nudges and check-ins show up here.'
+                  : 'Interview reminders, follow-up nudges, deadlines and check-ins will land here.'
               }
             />
           )}

@@ -19,7 +19,8 @@ import {
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { useApplications } from '../lib/applications'
-import { useNotifications, useSyncNotifications, useUpdateNotifications } from '../lib/notifications'
+import { useCheckins } from '../lib/checkins'
+import { checkinNotifications, notificationsFor, useNotifications, useSyncNotifications, useUpdateNotifications } from '../lib/notifications'
 import { useProfile } from '../lib/profile'
 import { useReminders } from '../lib/reminders'
 import { supabase } from '../lib/supabase'
@@ -64,9 +65,10 @@ export default function AppShell() {
   const [signingOut, setSigningOut] = useState(false)
   const [bell, setBell] = useState(false)
 
-  // Notifications are created here, when the app loads and whenever reminders change.
+  // Notifications are created here, when the app loads and whenever reminders or check-ins change.
   const { data: reminders } = useReminders()
-  useSyncNotifications(reminders)
+  const checkins = useCheckins()
+  useSyncNotifications(reminders && checkins ? [...notificationsFor(reminders), ...checkinNotifications(checkins)] : null)
   const { data: notifs = [] } = useNotifications()
   const updateNotifs = useUpdateNotifications()
   const unread = notifs.filter((n) => !n.read_at).length
@@ -75,11 +77,12 @@ export default function AppShell() {
     setSide(false)
     setBell(true)
   }
-  // Opening one marks it read and goes to its job (or Schedule when it has none).
+  // Opening one marks it read and goes to Check-ins, its job, or Schedule when it has no job.
   const openNotif = (n: AppNotification) => {
     if (!n.read_at) updateNotifs.mutate({ ids: [n.id], patch: { read_at: now() } })
     setBell(false)
-    if (n.application_id) navigate('/', { state: { open: n.application_id } })
+    if (n.kind === 'checkin') navigate('/checkins')
+    else if (n.application_id) navigate('/', { state: { open: n.application_id } })
     else navigate('/schedule')
   }
 
@@ -87,7 +90,13 @@ export default function AppShell() {
   useEffect(() => setSide(false), [pathname])
 
   const sidebar = (
-    <Sidebar onClose={narrow ? () => setSide(false) : undefined} onSignOut={() => setSigningOut(true)} unread={unread} onBell={openBell} />
+    <Sidebar
+      onClose={narrow ? () => setSide(false) : undefined}
+      onSignOut={() => setSigningOut(true)}
+      unread={unread}
+      onBell={openBell}
+      checkinsDue={checkins?.length ?? 0}
+    />
   )
 
   return (
@@ -147,11 +156,13 @@ function Sidebar({
   onSignOut,
   unread,
   onBell,
+  checkinsDue,
 }: {
   onClose?: () => void
   onSignOut: () => void
   unread: number
   onBell: () => void
+  checkinsDue: number
 }) {
   const { session } = useAuth()
   const { pathname } = useLocation()
@@ -164,7 +175,7 @@ function Sidebar({
   const email = session?.user.email ?? ''
   const name: string = profile?.full_name || meta.full_name || meta.name || email.split('@')[0] || 'You'
   const current = pathname
-  const counts: Record<string, number> = { '/': apps.filter((a) => a.status !== 'closed').length }
+  const counts: Record<string, number> = { '/': apps.filter((a) => a.status !== 'closed').length, '/checkins': checkinsDue }
   const inAccount = pathname === '/profile' || pathname === '/settings'
 
   return (

@@ -94,6 +94,8 @@ export interface Application {
   import_id: string | null
   // The CV version sent for this job (roadmap 4.1); null = not recorded.
   cv_version_id: string | null
+  // Last "No reply yet" answer on a check-in (roadmap 4.2); asked again 7 days later.
+  checked_in_at: string | null
   notes: string | null
   applied_at: string | null
   position: number
@@ -184,7 +186,7 @@ export type ReminderFields = Pick<Reminder, 'type' | 'title' | 'due_at'> &
   >
 
 // In-app notifications (roadmap 3.3, prototype NOTIF_KIND). Created by the app from reminders.
-export type NotificationKind = 'interview' | 'overdue' | 'deadline'
+export type NotificationKind = 'interview' | 'overdue' | 'deadline' | 'checkin'
 
 export interface AppNotification {
   id: string

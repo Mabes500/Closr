@@ -55,7 +55,7 @@ Do these first; everything later depends on them.
 
 ## Phase 4: Check-ins and CV versions
 - [x] **4.1 CV versions.** Label each CV/résumé version; pick the version when adding or editing a job; show response rate per version.
-- [ ] **4.2 Check-ins.** For applications quiet 7+ days, ask "how is it going": No reply yet / Interview / Rejected. One-tap answers update the stage; "No reply yet" offers a follow-up reminder.
+- [x] **4.2 Check-ins.** For applications quiet 7+ days, ask "how is it going": No reply yet / Interview / Rejected. One-tap answers update the stage; "No reply yet" offers a follow-up reminder.
 
 ## Phase 5: Goals
 - [ ] **5.1 Weekly target and streak.** Target from weekly pace; raise/lower; streak of days the user touched their search. Includes the streak card in Sidebar (deferred from 0.4).

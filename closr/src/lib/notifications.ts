@@ -1,19 +1,20 @@
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fmtTime, relDay } from './board'
+import type { Checkin } from './checkins'
 import { supabase } from './supabase'
 import { whenDue, type ReminderWithApp } from './reminders'
 import type { AppNotification, NotificationKind } from './types'
 
-// In-app notifications (roadmap 3.3). No email or scheduled jobs: the app creates them
-// itself from your reminders when it loads (and when reminders change), and the
+// In-app notifications (roadmap 3.3, check-ins 4.2). No email or scheduled jobs: the app
+// creates them itself from your reminders and check-ins when it loads (and when they change), and the
 // database's unique dedupe_key stops the same one being created twice.
 
 const KEY = ['notifications'] as const
 const DAY = 86_400_000
 export const KEEP_DAYS = 30
 
-type NewNotification = Pick<AppNotification, 'kind' | 'reminder_id' | 'application_id' | 'title' | 'body' | 'dedupe_key'>
+export type NewNotification = Pick<AppNotification, 'kind' | 'reminder_id' | 'application_id' | 'title' | 'body' | 'dedupe_key'>
 
 // Which reminders deserve a nudge right now:
 // interviews in the next 24 hours, follow-ups due or overdue, deadlines within 24 hours or overdue.
@@ -45,6 +46,19 @@ export function notificationsFor(reminders: ReminderWithApp[], now = new Date())
   return out
 }
 
+// One "how's it going" per quiet job. The key includes when it went quiet, so answering
+// "No reply yet" and going quiet for another week earns a new one.
+export function checkinNotifications(due: Checkin[]): NewNotification[] {
+  return due.map(({ app, days, quietSince }) => ({
+    kind: 'checkin',
+    reminder_id: null,
+    application_id: app.id,
+    title: `How's it going with ${app.company}?`,
+    body: `Applied ${days} days ago for ${app.role}. Heard back?`,
+    dedupe_key: `checkin:${app.id}:${quietSince}`,
+  }))
+}
+
 // Your notifications from the last 30 days, newest first (cleared ones hidden).
 export function useNotifications() {
   return useQuery({
@@ -63,11 +77,10 @@ export function useNotifications() {
   })
 }
 
-// Creates any missing notifications for these reminders, and removes ones older than 30 days.
-// Runs once the reminders have loaded, and again whenever the set of nudges changes.
-export function useSyncNotifications(reminders: ReminderWithApp[] | undefined) {
+// Creates any missing notifications (`null` while the data is still loading), and removes
+// ones older than 30 days. Runs once loaded, and again whenever the set of nudges changes.
+export function useSyncNotifications(wanted: NewNotification[] | null) {
   const qc = useQueryClient()
-  const wanted = reminders ? notificationsFor(reminders) : null
   const signature = wanted?.map((n) => n.dedupe_key).join('|')
   useEffect(() => {
     if (!wanted) return
