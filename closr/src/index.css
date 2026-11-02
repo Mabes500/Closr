@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* Closr design tokens (light theme is the default). Use these via Tailwind
+   classes like bg-surface, text-ink, border-line, bg-brand, text-spark. */
+@theme {
+  --font-sans: "General Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+
+  --color-brand: #2346D9;
+  --color-brand-hover: #1C39B5;
+  --color-brand-soft: #EAEEFC;
+  --color-spark: #E9A100;
+  --color-spark-soft: #FDF4DE;
+
+  --color-ink: #131A2C;
+  --color-ink-muted: #5B6478;
+  --color-ink-faint: #8A92A6;
+
+  --color-canvas: #F6F7FB;
+  --color-surface: #FFFFFF;
+  --color-line: #E3E6EF;
+  --color-line-strong: #CBD0DD;
+
+  --color-status-saved: #8A92A6;
+  --color-status-applied: #2346D9;
+  --color-status-interviewing: #E9A100;
+  --color-status-offer: #1F9D61;
+  --color-status-rejected: #D14343;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  @apply bg-canvas text-ink font-sans antialiased;
+}
