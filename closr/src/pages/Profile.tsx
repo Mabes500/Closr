@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Check, Loader, MapPin, Plus, RotateCcw, Wallet } from 'lucide-react'
+import { Check, Loader, MapPin, RotateCcw, Wallet } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
-import { Avatar, Button, Input, RoleChip, Select, ToggleChip } from '../components/ui'
-import { PACES, PACE_OPTIONS, STAGE_OPTIONS, cleanRole } from '../lib/onboarding'
+import RolePicker from '../components/RolePicker'
+import { Avatar, Button, Input, Select, ToggleChip } from '../components/ui'
+import { PACES, PACE_OPTIONS, STAGE_OPTIONS } from '../lib/onboarding'
 import { useProfile, useUpdateProfile } from '../lib/profile'
 import { PACE_TARGET, WORK_MODE_LABEL, type IdealStart, type Profile as ProfileRow, type WorkMode } from '../lib/types'
 import type { OnboardingState } from './Onboarding'
@@ -31,7 +32,6 @@ export default function Profile() {
   const { data: profile, isLoading } = useProfile()
   const update = useUpdateProfile()
   const navigate = useNavigate()
-  const [roleDraft, setRoleDraft] = useState('')
   const [touched, setTouched] = useState(false)
 
   if (isLoading) return null
@@ -42,13 +42,6 @@ export default function Profile() {
     update.mutate(patch)
   }
   const status = update.isPending ? 'saving' : update.isError ? 'error' : touched ? 'saved' : 'idle'
-
-  function addRole() {
-    const t = cleanRole(roleDraft)
-    setRoleDraft('')
-    if (!t || profile!.target_roles.some((r) => r.toLowerCase() === t.toLowerCase())) return
-    save({ target_roles: [...profile!.target_roles, t] })
-  }
 
   const stage = STAGE_OPTIONS.find((o) => o.id === profile.search_stage)
   const pace = PACES[profile.weekly_pace]
@@ -117,27 +110,7 @@ export default function Profile() {
             <Heading title="What you're looking for" sub="Used to pick openings on Jobs. Everything here is optional." />
             <div className="flex flex-col gap-2.5">
               <div className="text-[13px] font-semibold leading-[1.2] text-ink">Roles</div>
-              {profile.target_roles.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {profile.target_roles.map((r) => (
-                    <RoleChip key={r} label={r} onRemove={() => save({ target_roles: profile.target_roles.filter((x) => x !== r) })} />
-                  ))}
-                </div>
-              )}
-              <Input
-                id="pf-role"
-                inputSize="sm"
-                icon={Plus}
-                placeholder="Add a role and press Enter"
-                value={roleDraft}
-                onChange={(e) => setRoleDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addRole()
-                  }
-                }}
-              />
+              <RolePicker id="pf-role" variant="profile" roles={profile.target_roles} onChange={(target_roles) => save({ target_roles })} />
             </div>
             <div className="flex flex-col gap-2.5">
               <div className="text-[13px] font-semibold leading-[1.2] text-ink">Work setup</div>

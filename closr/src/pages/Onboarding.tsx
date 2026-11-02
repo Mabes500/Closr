@@ -1,23 +1,16 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, RotateCcw, Search, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, ArrowRight, RotateCcw, type LucideIcon } from 'lucide-react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { Logo, Mark } from '../components/Logo'
-import { Button, Input, RoleChip, SuggestChip } from '../components/ui'
-import {
-  OB_STEPS,
-  OB_SUGGEST,
-  PACE_OPTIONS,
-  STAGE_OPTIONS,
-  START_OPTIONS,
-  cleanRole,
-  type StartChoice,
-} from '../lib/onboarding'
+import RolePicker from '../components/RolePicker'
+import { Button } from '../components/ui'
+import { OB_STEPS, PACE_OPTIONS, STAGE_OPTIONS, START_OPTIONS, type StartChoice } from '../lib/onboarding'
 import { firstName, useProfile, useUpdateProfile } from '../lib/profile'
 import { PACE_TARGET, type SearchStage, type WeeklyPace } from '../lib/types'
 
-type State = { step: number; stage: SearchStage | null; roles: string[]; draft: string; pace: WeeklyPace; source: StartChoice | null }
-const BLANK: State = { step: 0, stage: null, roles: [], draft: '', pace: 'steady', source: null }
+type State = { step: number; stage: SearchStage | null; roles: string[]; pace: WeeklyPace; source: StartChoice | null }
+const BLANK: State = { step: 0, stage: null, roles: [], pace: 'steady', source: null }
 
 // /welcome. Arrives here after sign-in while profiles.onboarded_at is null, or from
 // Profile → "Redo onboarding" (location.state.redo).
@@ -103,17 +96,6 @@ export default function Onboarding() {
     }
   }
 
-  function addRole(raw: string) {
-    const t = cleanRole(raw)
-    if (!t) return
-    setS((x) =>
-      x.roles.some((r) => r.toLowerCase() === t.toLowerCase()) ? { ...x, draft: '' } : { ...x, roles: [...x.roles, t], draft: '' },
-    )
-  }
-
-  const q = s.draft.trim().toLowerCase()
-  const taken = new Set(s.roles.map((r) => r.toLowerCase()))
-  const suggestions = OB_SUGGEST.filter((x) => !taken.has(x.toLowerCase()) && (!q || x.toLowerCase().includes(q))).slice(0, 6)
   const pace = PACE_OPTIONS.find((o) => o.id === s.pace)!
   const stage = STAGE_OPTIONS.find((o) => o.id === s.stage)
   const doneCta = s.source === 'import' ? 'Import my spreadsheet' : s.source === 'link' ? 'Add my first job' : 'Go to my board'
@@ -156,46 +138,13 @@ export default function Onboarding() {
                 {def.key === 'pace' && <Options options={PACE_OPTIONS} value={s.pace} onPick={(id) => pick('pace', id)} />}
                 {def.key === 'source' && <Options options={START_OPTIONS} value={s.source} onPick={(id) => pick('source', id)} />}
                 {def.key === 'roles' && (
-                  <div className="flex flex-col gap-5">
-                    <Input
-                      id="ob-role"
-                      icon={Search}
-                      placeholder="Type a job title and press Enter"
-                      value={s.draft}
-                      autoFocus
-                      onChange={(e) => setS({ ...s, draft: e.target.value })}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault()
-                          if (s.draft.trim()) addRole(s.draft)
-                          else next()
-                        }
-                        if (e.key === 'Backspace' && !s.draft && s.roles.length) setS((x) => ({ ...x, roles: x.roles.slice(0, -1) }))
-                      }}
-                      hint={
-                        s.roles.length
-                          ? `${s.roles.length} added — press Enter on an empty field to continue`
-                          : 'Press Enter to add. You can change these any time.'
-                      }
-                    />
-                    {s.roles.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {s.roles.map((r) => (
-                          <RoleChip key={r} label={r} onRemove={() => setS((x) => ({ ...x, roles: x.roles.filter((y) => y !== r) }))} />
-                        ))}
-                      </div>
-                    )}
-                    {suggestions.length > 0 && (
-                      <div className="flex flex-col gap-2.5">
-                        <div className="text-[13px] font-semibold leading-[1.2] text-ink-500">{q ? 'Matching titles' : 'Popular titles'}</div>
-                        <div className="flex flex-wrap gap-2">
-                          {suggestions.map((x) => (
-                            <SuggestChip key={x} label={x} onAdd={() => addRole(x)} />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <RolePicker
+                    id="ob-role"
+                    variant="onboarding"
+                    roles={s.roles}
+                    onChange={(roles) => setS((x) => ({ ...x, roles }))}
+                    onEmptyEnter={next}
+                  />
                 )}
 
                 <div className="flex items-center justify-between gap-3 pt-1">

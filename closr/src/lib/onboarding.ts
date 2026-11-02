@@ -13,7 +13,8 @@ import {
 } from 'lucide-react'
 import { PACE_TARGET, type SearchStage, type WeeklyPace } from './types'
 
-// Copy and options from docs/prototype.html (OB_STEPS, OB_SUGGEST, PACES).
+// Copy and options from docs/prototype.html (OB_STEPS, PACES). Role suggestions come
+// from the role catalogue (src/data/roles.ts) instead of the prototype's OB_SUGGEST.
 
 export type StartChoice = 'import' | 'link' | 'fresh'
 
@@ -53,25 +54,8 @@ export const OB_STEPS = [
   },
 ] as const
 
-export const OB_SUGGEST = [
-  'Product designer',
-  'Content marketing manager',
-  'Software engineer',
-  'Data analyst',
-  'Project manager',
-  'Customer success manager',
-  'Marketing manager',
-  'UX researcher',
-]
-
 export const PACES: Record<WeeklyPace, { label: string; note: string }> = {
   ease: { label: 'Ease off', note: "A lighter pace is still progress. We'll keep nudges gentle." },
   steady: { label: 'Steady', note: 'A rhythm you can keep up. Consistency adds up over a few weeks.' },
   push: { label: 'All in', note: "Big week energy. We'll surface follow-ups first so nothing slips." },
-}
-
-// Tidy a typed role: collapse spaces, capitalise the first letter.
-export const cleanRole = (raw: string) => {
-  const t = raw.trim().replace(/\s+/g, ' ')
-  return t && t.charAt(0).toUpperCase() + t.slice(1)
 }

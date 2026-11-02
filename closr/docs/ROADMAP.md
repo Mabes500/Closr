@@ -63,7 +63,7 @@ Do these first; everything later depends on them.
 - [ ] **5.3 "People like you".** Where offers came from for similar users. Needs enough anonymised aggregate data; ship with the user's own comparison first and a sample-data label until then. Plan separately.
 
 ## Phase 6: Jobs feed
-- [ ] **6.1 Plan first** (separate session): which sources can be used legally (ATS public APIs such as Greenhouse, Lever, Ashby; company career pages), matching on roles, location, visa, time zone, salary floor; daily refresh.
+- [ ] **6.1 Plan first** (separate session): which sources can be used legally (ATS public APIs such as Greenhouse, Lever, Ashby; company career pages), matching on roles, location, visa, time zone, salary floor; daily refresh. Role matching should use the role catalogue in `src/data/roles.ts`: match postings on the catalogue titles and their aliases (e.g. a "SWE" posting matches a user who chose "Software engineer"), and fall back to plain text for roles users typed that aren't in the catalogue.
 - [ ] **6.2 Build.** Today's matches with reasons, save to board, "Not for me", posting page.
 
 ## Phase 7: Settings and launch

@@ -366,9 +366,17 @@ export function RoleChip({ label, onRemove }: { label: string; onRemove: () => v
   )
 }
 
-export function SuggestChip({ label, onAdd }: { label: string; onAdd: () => void }) {
+// `id`/`active` let a search box highlight a suggestion with the arrow keys.
+export function SuggestChip({ label, onAdd, id, active }: { label: string; onAdd: () => void; id?: string; active?: boolean }) {
   return (
-    <button type="button" onClick={onAdd} className={`${chip} ${chipOff}`}>
+    <button
+      type="button"
+      id={id}
+      role={id ? 'option' : undefined}
+      aria-selected={id ? !!active : undefined}
+      onClick={onAdd}
+      className={`${chip} ${chipOff} ${active ? 'border-blue-600 shadow-[0_0_0_3px_var(--color-focus)]' : ''}`}
+    >
       <Plus size={14} className="text-ink-400" />
       {label}
     </button>
