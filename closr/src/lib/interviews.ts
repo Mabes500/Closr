@@ -29,7 +29,11 @@ export function useCreateInterview() {
       const { error } = await supabase.from('interviews').insert(input)
       if (error) throw error
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEY })
+      // A DB trigger may have moved the application to Interviewing.
+      qc.invalidateQueries({ queryKey: ['applications'] })
+    },
   })
 }
 
