@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import type { Prepared } from './importSheet'
+import { registerBoards } from './jobBoards'
 import { supabase } from './supabase'
 
 // Saving a spreadsheet import, and undoing it. Every row carries the import's id
@@ -50,6 +51,8 @@ export function useImportJobs() {
       qc.invalidateQueries({ queryKey: ['applications'] })
     }
     remember({ id: importId!, count: rows.length, file, at: new Date().toISOString() })
+    // Greenhouse/Lever/Ashby links in the sheet add those companies to the jobs feed.
+    void registerBoards(rows.map((r) => r.values.job_url))
   }
 
   async function undo(importId: string) {

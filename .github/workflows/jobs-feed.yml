@@ -1,0 +1,68 @@
+# Jobs feed (roadmap 6.2a, closr/docs/JOBS-FEED-PLAN.md section 3).
+# Once a day, reads every employer job board in Supabase's job_boards table and saves
+# the postings to job_postings. Run it by hand from the Actions tab: "Jobs feed" →
+# "Run workflow".
+#
+# Needs two repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL               the Supabase Project URL (same value as VITE_SUPABASE_URL)
+#   SUPABASE_SERVICE_ROLE_KEY  Supabase → Project Settings → API Keys → secret key
+# The secret key bypasses Row Level Security. It lives only here, never in the app.
+
+name: Jobs feed
+
+on:
+  schedule:
+    - cron: '30 4 * * *' # every day at 04:30 UTC
+  workflow_dispatch:
+    inputs:
+      load_seed:
+        description: 'Load the starter list first (closr/scripts/jobs/seed-boards.csv)'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Dry run: read the boards and count, but save nothing'
+        type: boolean
+        default: false
+      limit:
+        description: 'Only read this many boards (leave empty for all)'
+        type: string
+        default: ''
+
+# Never two runs at once.
+concurrency:
+  group: jobs-feed
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: closr
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+      LIMIT: ${{ inputs.limit }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: closr/package-lock.json
+
+      # Only the runtime packages (the scripts need @supabase/supabase-js); skip install scripts.
+      - run: npm ci --omit=dev --ignore-scripts
+
+      - name: Load the starter list
+        if: ${{ inputs.load_seed && inputs.dry_run != true }}
+        run: node scripts/jobs/load-seed.ts
+
+      - name: Read job boards
+        run: node scripts/jobs/run.ts
