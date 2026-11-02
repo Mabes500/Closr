@@ -172,6 +172,31 @@ export interface ApplicationContact {
   created_at: string
 }
 
+export type SearchStage = 'starting' | 'applying' | 'interviewing' | 'browsing'
+export type WeeklyPace = 'ease' | 'steady' | 'push'
+export type IdealStart = 'asap' | 'months' | 'right_fit'
+
+// Applications a week per pace (prototype PACE_N); the target itself is used in Phase 5.
+export const PACE_TARGET: Record<WeeklyPace, number> = { ease: 2, steady: 5, push: 10 }
+
+export interface Profile {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
+  search_stage: SearchStage | null
+  target_roles: string[]
+  weekly_pace: WeeklyPace
+  work_setups: WorkMode[]
+  locations: string | null
+  salary_floor: number | null
+  salary_floor_currency: string | null
+  ideal_start: IdealStart | null
+  // null until onboarding is finished or skipped.
+  onboarded_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 export type NewApplication = Pick<Application, 'company' | 'role'> &
   Partial<
     Pick<
