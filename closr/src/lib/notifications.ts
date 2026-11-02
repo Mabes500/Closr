@@ -59,6 +59,24 @@ export function checkinNotifications(due: Checkin[]): NewNotification[] {
   }))
 }
 
+// Streak milestones get one nudge each (per streak: a new streak can earn them again).
+const STREAK_MILESTONES = [3, 7, 14, 21, 30, 50, 75, 100, 150, 200, 365]
+
+export function streakNotifications(streak: number, startedOn: string): NewNotification[] {
+  const m = [...STREAK_MILESTONES].reverse().find((x) => streak >= x)
+  if (!m) return []
+  return [
+    {
+      kind: 'streak',
+      reminder_id: null,
+      application_id: null,
+      title: `${m}-day streak`,
+      body: `You've touched your search every day for ${m} days.`,
+      dedupe_key: `streak:${startedOn}:${m}`,
+    },
+  ]
+}
+
 // Your notifications from the last 30 days, newest first (cleared ones hidden).
 export function useNotifications() {
   return useQuery({

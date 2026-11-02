@@ -186,7 +186,7 @@ export type ReminderFields = Pick<Reminder, 'type' | 'title' | 'due_at'> &
   >
 
 // In-app notifications (roadmap 3.3, prototype NOTIF_KIND). Created by the app from reminders.
-export type NotificationKind = 'interview' | 'overdue' | 'deadline' | 'checkin'
+export type NotificationKind = 'interview' | 'overdue' | 'deadline' | 'checkin' | 'streak'
 
 export interface AppNotification {
   id: string
@@ -230,7 +230,7 @@ export type SearchStage = 'starting' | 'applying' | 'interviewing' | 'browsing'
 export type WeeklyPace = 'ease' | 'steady' | 'push'
 export type IdealStart = 'asap' | 'months' | 'right_fit'
 
-// Applications a week per pace (prototype PACE_N); the target itself is used in Phase 5.
+// Applications a week per pace (prototype PACE_N): the weekly target on Goals.
 export const PACE_TARGET: Record<WeeklyPace, number> = { ease: 2, steady: 5, push: 10 }
 
 export interface Profile {
@@ -249,6 +249,8 @@ export interface Profile {
   onboarded_at: string | null
   // Offer a follow-up 7 days out when a job is marked Applied.
   suggest_follow_ups: boolean
+  // IANA time zone, saved from the browser (roadmap 5.1), e.g. "Europe/London".
+  time_zone: string | null
   created_at: string
   updated_at: string
 }

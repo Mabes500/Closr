@@ -10,6 +10,7 @@ import {
   LogOut,
   Menu as MenuIcon,
   Settings,
+  Sparkles,
   Target,
   Upload,
   User,
@@ -20,20 +21,29 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { useApplications } from '../lib/applications'
 import { useCheckins } from '../lib/checkins'
-import { checkinNotifications, notificationsFor, useNotifications, useSyncNotifications, useUpdateNotifications } from '../lib/notifications'
-import { useProfile } from '../lib/profile'
+import {
+  checkinNotifications,
+  notificationsFor,
+  streakNotifications,
+  useNotifications,
+  useSyncNotifications,
+  useUpdateNotifications,
+} from '../lib/notifications'
+import { browserTimeZone, useWeekProgress } from '../lib/goals'
+import { useProfile, useUpdateProfile } from '../lib/profile'
 import { useReminders } from '../lib/reminders'
 import { supabase } from '../lib/supabase'
 import type { AppNotification } from '../lib/types'
 import { Checkbox } from './auth/fields'
 import { Logo } from './Logo'
 import NotificationPanel from './NotificationPanel'
+import { StreakDots } from './Progress'
 import { Avatar, Button, Dialog, IconButton } from './ui'
 
 // App shell from docs/prototype.html (AppShell, Sidebar, NAV): fixed sidebar on wide
 // screens; below 861px a top bar with a menu button that slides the sidebar in.
-// The notification bell sits in the sidebar header and the mobile top bar.
-// Left out until their features exist: streak card (5.1), dark-mode toggle (7.1).
+// The notification bell sits in the sidebar header and the mobile top bar; the streak
+// card above the user menu. Left out until it exists: dark-mode toggle (7.1).
 
 export const NAV: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/', label: 'Board', icon: LayoutGrid },
@@ -65,10 +75,24 @@ export default function AppShell() {
   const [signingOut, setSigningOut] = useState(false)
   const [bell, setBell] = useState(false)
 
-  // Notifications are created here, when the app loads and whenever reminders or check-ins change.
+  // Save the browser's time zone, so "this week" and "today" follow the user's own clock.
+  const { data: profile } = useProfile()
+  const updateProfile = useUpdateProfile()
+  const tz = browserTimeZone()
+  useEffect(() => {
+    if (profile && profile.time_zone !== tz) updateProfile.mutate({ time_zone: tz })
+    // Runs only when the saved zone changes (updateProfile is a new object every render).
+  }, [profile?.time_zone, tz])
+
+  // Notifications are created here, when the app loads and whenever reminders, check-ins or the streak change.
   const { data: reminders } = useReminders()
   const checkins = useCheckins()
-  useSyncNotifications(reminders && checkins ? [...notificationsFor(reminders), ...checkinNotifications(checkins)] : null)
+  const progress = useWeekProgress()
+  useSyncNotifications(
+    reminders && checkins && progress.loaded
+      ? [...notificationsFor(reminders), ...checkinNotifications(checkins), ...streakNotifications(progress.streak, progress.startedOn)]
+      : null,
+  )
   const { data: notifs = [] } = useNotifications()
   const updateNotifs = useUpdateNotifications()
   const unread = notifs.filter((n) => !n.read_at).length
@@ -77,11 +101,12 @@ export default function AppShell() {
     setSide(false)
     setBell(true)
   }
-  // Opening one marks it read and goes to Check-ins, its job, or Schedule when it has no job.
+  // Opening one marks it read and goes to Check-ins, Goals, its job, or Schedule when it has no job.
   const openNotif = (n: AppNotification) => {
     if (!n.read_at) updateNotifs.mutate({ ids: [n.id], patch: { read_at: now() } })
     setBell(false)
     if (n.kind === 'checkin') navigate('/checkins')
+    else if (n.kind === 'streak') navigate('/goals')
     else if (n.application_id) navigate('/', { state: { open: n.application_id } })
     else navigate('/schedule')
   }
@@ -96,6 +121,7 @@ export default function AppShell() {
       unread={unread}
       onBell={openBell}
       checkinsDue={checkins?.length ?? 0}
+      streak={progress.loaded ? progress : null}
     />
   )
 
@@ -143,7 +169,7 @@ function BellButton({ unread, onClick }: { unread: number; onClick: () => void }
     <span className="relative">
       <IconButton icon={Bell} label={unread ? `${unread} unread notifications` : 'Notifications'} onClick={onClick} />
       {unread > 0 && (
-        <span className="pointer-events-none absolute right-px top-0.5 h-[17px] min-w-[17px] rounded-full bg-coral-600 px-[5px] text-center text-[10px] font-bold leading-[17px] text-white shadow-[0_0_0_2px_var(--color-white)]">
+        <span className="pointer-events-none absolute right-px top-0.5 h-[17px] min-w-[17px] rounded-full bg-coral-600 px-[5px] text-center text-[10px] font-bold leading-[17px] text-white shadow-[0_0_0_2px_white]">
           {unread}
         </span>
       )}
@@ -157,12 +183,14 @@ function Sidebar({
   unread,
   onBell,
   checkinsDue,
+  streak,
 }: {
   onClose?: () => void
   onSignOut: () => void
   unread: number
   onBell: () => void
   checkinsDue: number
+  streak: { streak: number; activeToday: boolean } | null
 }) {
   const { session } = useAuth()
   const { pathname } = useLocation()
@@ -216,7 +244,25 @@ function Sidebar({
         })}
       </nav>
 
-      <div className="relative mt-auto flex items-center gap-1.5 pt-4">
+      {/* Prototype sidebar streak card. */}
+      {streak && (
+        <div className="mt-auto flex flex-col gap-2 rounded-2xl border border-gold-100 bg-gold-100/50 p-3.5">
+          <div className="flex items-center gap-2 text-[13px] font-semibold leading-[1.2] text-ink">
+            <Sparkles size={16} className="text-gold-500" />
+            {streak.streak ? `${streak.streak}-day streak` : 'Start a streak'}
+          </div>
+          <span className="text-xs leading-[1.45] text-ink-700">
+            {streak.streak > 6
+              ? "You've touched your search every day this week. Keep the rhythm going."
+              : streak.streak
+                ? 'Nice start. Touch your search once a day to keep it going.'
+                : 'Add a job or tick off a plan step today to start one.'}
+          </span>
+          <StreakDots streak={streak.streak} activeToday={streak.activeToday} />
+        </div>
+      )}
+
+      <div className={`relative flex items-center gap-1.5 ${streak ? '' : 'mt-auto'} pt-4`}>
         <button
           type="button"
           onClick={() => setMenu(true)}
