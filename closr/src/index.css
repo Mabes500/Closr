@@ -73,6 +73,12 @@
   --color-focus: rgb(125 149 255 / 0.4);
 }
 
+/* Onboarding step change (prototype `ob-in`). */
+@keyframes ob-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
 /* Mobile sidebar slide-in (prototype `sb-in`). */
 @keyframes sb-in {
   from { transform: translateX(-24px); opacity: 0.4; }

@@ -1,6 +1,6 @@
 import { useState, type DragEvent } from 'react'
 import { Briefcase, FileSpreadsheet, Link as LinkIcon, Plus, Search, Upload } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useApplications, useMoveApplication, useUpdateApplication } from '../lib/applications'
 import { isStale, nextInterviews } from '../lib/board'
 import { useInterviews } from '../lib/interviews'
@@ -59,7 +59,9 @@ export default function Board() {
   const [layout, setLayoutState] = useState<Layout>(loadLayout)
   const [filter, setFilter] = useState<Filter>('all')
   const [q, setQ] = useState('')
-  const [adding, setAdding] = useState(false)
+  // Onboarding's "Add my first job" arrives with state { add: 'link' } (the modal opens on Paste link).
+  const location = useLocation()
+  const [adding, setAdding] = useState(() => (location.state as { add?: string } | null)?.add === 'link')
   const [dragOver, setDragOver] = useState<ApplicationStatus | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const [closing, setClosing] = useState<Application | null>(null)
@@ -239,7 +241,15 @@ export default function Board() {
         </>
       )}
 
-      {adding && <AddJobModal onClose={() => setAdding(false)} />}
+      {adding && (
+        <AddJobModal
+          onClose={() => {
+            setAdding(false)
+            // Drop onboarding's { add: 'link' } so a reload doesn't reopen the modal.
+            if (location.state) navigate(location.pathname, { replace: true, state: null })
+          }}
+        />
+      )}
       {openApp && (
         <ApplicationDrawer
           app={openApp}

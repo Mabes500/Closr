@@ -12,6 +12,8 @@ import ResetPassword from './pages/ResetPassword'
 import Board from './pages/Board'
 import Interviews from './pages/Interviews'
 import ComingSoon from './pages/ComingSoon'
+import Onboarding from './pages/Onboarding'
+import { useProfile } from './lib/profile'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } })
 
@@ -23,6 +25,16 @@ function RequireAuth({ children }: { children: ReactNode }) {
   // Signed-out visitors see the landing page at /, and are sent to sign in from any other app page.
   // A failed sign-in redirect also goes to /login, where the error is shown.
   if (!session) return pathname === '/' && !authError ? <Landing /> : <Navigate to="/login" replace />
+  return children
+}
+
+// Signed-in users who haven't finished (or skipped) onboarding are sent to it first.
+// Works the same for email and Google sign-ups: both land on / after signing in.
+function RequireOnboarded({ children }: { children: ReactNode }) {
+  const { data: profile, isLoading } = useProfile()
+  if (isLoading) return null
+  // No profile row would make onboarding unable to save, so let the user in rather than loop.
+  if (profile && !profile.onboarded_at) return <Navigate to="/welcome" replace />
   return children
 }
 
@@ -52,9 +64,19 @@ export default function App() {
             <Route path="/forgot/sent" element={<ResetSent />} />
             <Route path="/reset" element={<ResetPassword />} />
             <Route
+              path="/welcome"
               element={
                 <RequireAuth>
-                  <AppShell />
+                  <Onboarding />
+                </RequireAuth>
+              }
+            />
+            <Route
+              element={
+                <RequireAuth>
+                  <RequireOnboarded>
+                    <AppShell />
+                  </RequireOnboarded>
                 </RequireAuth>
               }
             >

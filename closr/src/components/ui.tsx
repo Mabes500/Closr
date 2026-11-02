@@ -1,5 +1,5 @@
 import { useEffect, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
-import { ChevronDown, X, type LucideIcon } from 'lucide-react'
+import { ChevronDown, Plus, X, type LucideIcon } from 'lucide-react'
 
 // App building blocks matching docs/prototype.html's design system
 // (Dialog, Drawer, Tabs, Switch, Select, Input, Button, Field, SectionTitle,
@@ -11,27 +11,37 @@ export const focusRing = 'focus-visible:outline-none focus-visible:shadow-[0_0_0
 // Buttons
 // ---------------------------------------------------------------------------
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'secondary' | 'ghost'
-  size?: 'sm' | 'md'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'spark'
+  size?: 'sm' | 'md' | 'lg'
   icon?: LucideIcon
+  iconRight?: LucideIcon
 }
 
 const BUTTON_VARIANT = {
   primary: 'border-transparent bg-oxford-900 text-white hover:enabled:bg-oxford-800',
   secondary: 'border-paper-300 bg-white text-ink hover:enabled:border-ink-300 hover:enabled:bg-paper-50',
   ghost: 'border-transparent bg-transparent text-ink-700 hover:enabled:bg-paper-100 hover:enabled:text-ink',
+  spark:
+    'border-transparent bg-gold-500 text-ink shadow-[0_3px_0_var(--color-oxford-900)] hover:enabled:-translate-y-px hover:enabled:bg-gold-400',
 }
 
-export function Button({ variant = 'primary', size = 'md', icon: Icon, className = '', children, ...rest }: ButtonProps) {
-  const sizing = size === 'sm' ? 'h-8 gap-1.5 rounded-lg px-3 text-[13px]' : 'h-10 gap-2 rounded-xl px-[18px] text-[15px]'
+const BUTTON_SIZE = {
+  sm: 'h-8 gap-1.5 rounded-lg px-3 text-[13px]',
+  md: 'h-10 gap-2 rounded-xl px-[18px] text-[15px]',
+  lg: 'h-12 gap-2 rounded-2xl px-6 text-base',
+}
+const ICON_SIZE = { sm: 15, md: 17, lg: 19 }
+
+export function Button({ variant = 'primary', size = 'md', icon: Icon, iconRight: IconRight, className = '', children, ...rest }: ButtonProps) {
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center whitespace-nowrap border-[1.5px] font-semibold leading-none transition-[background,border-color,transform] active:enabled:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 ${focusRing} ${sizing} ${BUTTON_VARIANT[variant]} ${className}`}
+      className={`inline-flex items-center justify-center whitespace-nowrap border-[1.5px] font-semibold leading-none transition-[background,border-color,transform] active:enabled:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 ${focusRing} ${BUTTON_SIZE[size]} ${BUTTON_VARIANT[variant]} ${className}`}
       {...rest}
     >
-      {Icon && <Icon size={size === 'sm' ? 15 : 17} />}
+      {Icon && <Icon size={ICON_SIZE[size]} />}
       {children}
+      {IconRight && <IconRight size={ICON_SIZE[size]} />}
     </button>
   )
 }
@@ -72,17 +82,23 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   label?: string
   icon?: LucideIcon
   inputSize?: 'sm' | 'md'
+  hint?: ReactNode
   wrapClassName?: string
 }
 
-export function Input({ id, label, icon: Icon, inputSize = 'md', wrapClassName = '', className = '', ...rest }: InputProps) {
+export function Input({ id, label, icon: Icon, inputSize = 'md', hint, wrapClassName = '', className = '', ...rest }: InputProps) {
   return (
     <div className={`flex min-w-0 flex-col gap-1.5 ${wrapClassName}`}>
       {label && <FieldLabel htmlFor={id}>{label}</FieldLabel>}
       <div className={ctl(inputSize)}>
         {Icon && <Icon size={17} className="shrink-0" />}
-        <input id={id} className={`${ctlInput} ${className}`} {...rest} />
+        <input id={id} aria-describedby={hint ? `${id}-hint` : undefined} className={`${ctlInput} ${className}`} {...rest} />
       </div>
+      {hint && (
+        <span id={`${id}-hint`} className="text-xs leading-[1.4] text-ink-500">
+          {hint}
+        </span>
+      )}
     </div>
   )
 }
@@ -332,6 +348,38 @@ export function Badge({ className = 'bg-paper-200 text-ink-700', dot, children }
       {dot && <span className={`size-[7px] shrink-0 rounded-full ${dot}`} />}
       {children}
     </span>
+  )
+}
+
+// Role chips (prototype `RoleChip` / `SuggestChip`): a chosen role removes itself on
+// click; a suggestion adds itself. Also used for on/off toggles (`ob-chip`).
+const chip = `flex h-[34px] items-center gap-1.5 rounded-full border-[1.5px] text-sm font-medium leading-none transition-[border-color,background,transform] active:scale-[.96] ${focusRing}`
+const chipOn = 'border-oxford-900 bg-oxford-900 pl-3.5 pr-2.5 text-white hover:border-oxford-800 hover:bg-oxford-800'
+const chipOff = 'border-paper-300 bg-white pl-2.5 pr-3.5 text-ink hover:border-ink-300'
+
+export function RoleChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <button type="button" onClick={onRemove} aria-label={`Remove ${label}`} className={`${chip} ${chipOn}`}>
+      {label}
+      <X size={14} />
+    </button>
+  )
+}
+
+export function SuggestChip({ label, onAdd }: { label: string; onAdd: () => void }) {
+  return (
+    <button type="button" onClick={onAdd} className={`${chip} ${chipOff}`}>
+      <Plus size={14} className="text-ink-400" />
+      {label}
+    </button>
+  )
+}
+
+export function ToggleChip({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button type="button" aria-pressed={on} onClick={onClick} className={`${chip} px-3.5 ${on ? chipOn : chipOff}`}>
+      {children}
+    </button>
   )
 }
 
