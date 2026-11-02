@@ -181,6 +181,23 @@ export type ReminderFields = Pick<Reminder, 'type' | 'title' | 'due_at'> &
     >
   >
 
+// In-app notifications (roadmap 3.3, prototype NOTIF_KIND). Created by the app from reminders.
+export type NotificationKind = 'interview' | 'overdue' | 'deadline'
+
+export interface AppNotification {
+  id: string
+  user_id: string
+  kind: NotificationKind
+  reminder_id: string | null
+  application_id: string | null
+  title: string
+  body: string
+  dedupe_key: string
+  read_at: string | null
+  cleared_at: string | null
+  created_at: string
+}
+
 export interface Contact {
   id: string
   user_id: string

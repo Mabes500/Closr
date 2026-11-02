@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import {
+  Bell,
   Briefcase,
   CalendarCheck,
   CalendarClock,
@@ -18,16 +19,20 @@ import {
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { useApplications } from '../lib/applications'
+import { useNotifications, useSyncNotifications, useUpdateNotifications } from '../lib/notifications'
 import { useProfile } from '../lib/profile'
+import { useReminders } from '../lib/reminders'
 import { supabase } from '../lib/supabase'
+import type { AppNotification } from '../lib/types'
 import { Checkbox } from './auth/fields'
 import { Logo } from './Logo'
+import NotificationPanel from './NotificationPanel'
 import { Avatar, Button, Dialog, IconButton } from './ui'
 
 // App shell from docs/prototype.html (AppShell, Sidebar, NAV): fixed sidebar on wide
 // screens; below 861px a top bar with a menu button that slides the sidebar in.
-// Left out until their features exist: notification bell (3.3), streak card (5.1),
-// dark-mode toggle (7.1).
+// The notification bell sits in the sidebar header and the mobile top bar.
+// Left out until their features exist: streak card (5.1), dark-mode toggle (7.1).
 
 export const NAV: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/', label: 'Board', icon: LayoutGrid },
@@ -54,13 +59,36 @@ function useIsNarrow() {
 export default function AppShell() {
   const narrow = useIsNarrow()
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const [side, setSide] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
+  const [bell, setBell] = useState(false)
+
+  // Notifications are created here, when the app loads and whenever reminders change.
+  const { data: reminders } = useReminders()
+  useSyncNotifications(reminders)
+  const { data: notifs = [] } = useNotifications()
+  const updateNotifs = useUpdateNotifications()
+  const unread = notifs.filter((n) => !n.read_at).length
+  const now = () => new Date().toISOString()
+  const openBell = () => {
+    setSide(false)
+    setBell(true)
+  }
+  // Opening one marks it read and goes to its job (or Schedule when it has none).
+  const openNotif = (n: AppNotification) => {
+    if (!n.read_at) updateNotifs.mutate({ ids: [n.id], patch: { read_at: now() } })
+    setBell(false)
+    if (n.application_id) navigate('/', { state: { open: n.application_id } })
+    else navigate('/schedule')
+  }
 
   // Close the mobile menu whenever the page changes.
   useEffect(() => setSide(false), [pathname])
 
-  const sidebar = <Sidebar onClose={narrow ? () => setSide(false) : undefined} onSignOut={() => setSigningOut(true)} />
+  const sidebar = (
+    <Sidebar onClose={narrow ? () => setSide(false) : undefined} onSignOut={() => setSigningOut(true)} unread={unread} onBell={openBell} />
+  )
 
   return (
     <div className="flex min-h-screen bg-paper-50">
@@ -71,6 +99,7 @@ export default function AppShell() {
           <span className="flex-1">
             <Logo size={24} />
           </span>
+          <BellButton unread={unread} onClick={openBell} />
         </header>
       )}
       {narrow && side && (
@@ -83,12 +112,47 @@ export default function AppShell() {
       <main className="flex min-w-0 flex-1 flex-col px-[max(16px,env(safe-area-inset-left))] pb-24 pt-[calc(80px+env(safe-area-inset-top))] min-[861px]:px-8 min-[861px]:pb-10 min-[861px]:pt-7">
         <Outlet />
       </main>
+      {bell && (
+        <NotificationPanel
+          items={notifs}
+          narrow={narrow}
+          onClose={() => setBell(false)}
+          onOpen={openNotif}
+          onMarkAll={() => updateNotifs.mutate({ ids: notifs.filter((n) => !n.read_at).map((n) => n.id), patch: { read_at: now() } })}
+          onToggleRead={(n) => updateNotifs.mutate({ ids: [n.id], patch: { read_at: n.read_at ? null : now() } })}
+          onClear={() => updateNotifs.mutate({ ids: notifs.map((n) => n.id), patch: { cleared_at: now() } })}
+        />
+      )}
       {signingOut && <SignOutDialog onClose={() => setSigningOut(false)} />}
     </div>
   )
 }
 
-function Sidebar({ onClose, onSignOut }: { onClose?: () => void; onSignOut: () => void }) {
+// Bell with the unread count (prototype Sidebar header and mobile top bar).
+function BellButton({ unread, onClick }: { unread: number; onClick: () => void }) {
+  return (
+    <span className="relative">
+      <IconButton icon={Bell} label={unread ? `${unread} unread notifications` : 'Notifications'} onClick={onClick} />
+      {unread > 0 && (
+        <span className="pointer-events-none absolute right-px top-0.5 h-[17px] min-w-[17px] rounded-full bg-coral-600 px-[5px] text-center text-[10px] font-bold leading-[17px] text-white shadow-[0_0_0_2px_var(--color-white)]">
+          {unread}
+        </span>
+      )}
+    </span>
+  )
+}
+
+function Sidebar({
+  onClose,
+  onSignOut,
+  unread,
+  onBell,
+}: {
+  onClose?: () => void
+  onSignOut: () => void
+  unread: number
+  onBell: () => void
+}) {
   const { session } = useAuth()
   const { pathname } = useLocation()
   const navigate = useNavigate()
@@ -109,6 +173,7 @@ function Sidebar({ onClose, onSignOut }: { onClose?: () => void; onSignOut: () =
         <span className="flex-1">
           <Logo size={28} />
         </span>
+        <BellButton unread={unread} onClick={onBell} />
         {onClose && <IconButton icon={X} label="Close menu" onClick={onClose} />}
       </div>
 

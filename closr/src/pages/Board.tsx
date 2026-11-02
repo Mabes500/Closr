@@ -1,4 +1,4 @@
-import { useState, type DragEvent } from 'react'
+import { useEffect, useState, type DragEvent } from 'react'
 import { Briefcase, FileSpreadsheet, Link as LinkIcon, Plus, Search, Send, Upload } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useApplications, useMoveApplication, useUpdateApplication } from '../lib/applications'
@@ -65,8 +65,13 @@ export default function Board() {
   const location = useLocation()
   const [adding, setAdding] = useState(() => (location.state as { add?: string } | null)?.add === 'link')
   const [dragOver, setDragOver] = useState<ApplicationStatus | null>(null)
-  // Schedule's "Open job" arrives with state { open: id }.
-  const [openId, setOpenId] = useState<string | null>(() => (location.state as { open?: string } | null)?.open ?? null)
+  // Schedule's "Open job" and notifications arrive with state { open: id }, also while
+  // the board is already showing.
+  const [openId, setOpenId] = useState<string | null>(null)
+  const openFromLink = (location.state as { open?: string } | null)?.open
+  useEffect(() => {
+    if (openFromLink) setOpenId(openFromLink)
+  }, [openFromLink, location.key])
   const [closing, setClosing] = useState<Application | null>(null)
   const [asking, setAsking] = useState<Application | null>(null)
   const [offer, setOffer] = useState<Pick<Application, 'id' | 'company'> | null>(null)
