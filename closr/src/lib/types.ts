@@ -90,6 +90,8 @@ export interface Application {
   next_action: string | null
   // Legacy free-text salary from before salary_min/max; not shown.
   salary: string | null
+  // Set on jobs that came from a spreadsheet import; "Undo import" deletes by it.
+  import_id: string | null
   notes: string | null
   applied_at: string | null
   position: number

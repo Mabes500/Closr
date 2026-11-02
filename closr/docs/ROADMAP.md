@@ -46,7 +46,7 @@ Do these first; everything later depends on them.
 
 ## Phase 2: Getting jobs in
 - [x] **2.1 Paste a job link.** Server function (Vercel serverless function `api/parse-job.ts`, signed-in users only) fetches the posting and pre-fills title, company, location, work mode, salary where available. User reviews before saving. Quick add stays: only title and company required.
-- [ ] **2.2 Spreadsheet import.** Upload CSV or XLSX, auto-match columns to Closr fields with manual override, map the user's status words to stages, preview, import, undo import.
+- [x] **2.2 Spreadsheet import.** Upload CSV or XLSX, auto-match columns to Closr fields with manual override, map the user's status words to stages, preview, import, undo import.
 
 ## Phase 3: Schedule and reminders
 - [ ] **3.1 Reminders.** Reminders table with types Follow up, Interview, Deadline, Reminder (`REM_TYPES`), linked to a job, with due time, done, snooze. Existing interviews migrate in.
