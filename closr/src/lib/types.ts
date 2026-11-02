@@ -82,5 +82,29 @@ export interface Interview {
 export type NewInterview = Pick<Interview, 'application_id' | 'round_name' | 'scheduled_at'> &
   Partial<Pick<Interview, 'format' | 'interviewer' | 'notes' | 'outcome'>>
 
+export interface Contact {
+  id: string
+  user_id: string
+  name: string
+  company: string | null
+  title: string | null
+  email: string | null
+  linkedin_url: string | null
+  notes: string | null
+  last_contacted_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type NewContact = Pick<Contact, 'name'> &
+  Partial<Pick<Contact, 'company' | 'title' | 'email' | 'linkedin_url' | 'notes' | 'last_contacted_at'>>
+
+export interface ApplicationContact {
+  application_id: string
+  contact_id: string
+  user_id: string
+  created_at: string
+}
+
 export type NewApplication = Pick<Application, 'company' | 'role'> &
   Partial<Pick<Application, 'job_url' | 'location' | 'work_mode' | 'status' | 'salary' | 'source' | 'notes' | 'applied_at'>>

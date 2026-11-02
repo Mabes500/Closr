@@ -5,7 +5,8 @@ import { Logo } from './Logo'
 const nav = [
   { to: '/', label: 'Board', end: true },
   { to: '/interviews', label: 'Interviews' },
-  // Upcoming: { to: '/goals', label: 'Goals' }, { to: '/contacts', label: 'Contacts' }
+  { to: '/contacts', label: 'Contacts' },
+  // Upcoming: { to: '/goals', label: 'Goals' }
 ]
 
 export default function Layout() {

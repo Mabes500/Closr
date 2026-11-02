@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { groupInterviews, useInterviews } from '../lib/interviews'
 import { STATUS_LABEL, type Application, type Interview } from '../lib/types'
+import ApplicationContacts from './ApplicationContacts'
 import InterviewDialog from './InterviewDialog'
 import InterviewRow from './InterviewRow'
 
-// Side panel for one application. For now it shows the basics and interviews;
+// Side panel for one application. For now it shows the basics, interviews and contacts;
 // notes, timeline and field editing (roadmap item 2) will be added here.
 export default function ApplicationDrawer({ app, onClose }: { app: Application; onClose: () => void }) {
   const { data: all = [], isLoading } = useInterviews()
@@ -74,6 +75,8 @@ export default function ApplicationDrawer({ app, onClose }: { app: Application; 
             </>
           )}
         </section>
+
+        <ApplicationContacts app={app} />
       </aside>
 
       {editing && (

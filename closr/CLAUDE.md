@@ -29,10 +29,10 @@ The clickable prototype (`Closr App.html` in the Closr claude.ai Project) is the
 
 ## Roadmap
 1. Done: auth, applications board, drag-and-drop status, event log
-2. Application detail drawer (notes, timeline from `application_events`, edit fields)
-3. Dashboard stats (applied this week, response rate, by source)
-4. Interviews with dates and reminders
-5. Contacts linked to applications
+2. Done (partly): application detail drawer, opened by clicking a board card, showing interviews and contacts. Still to do: notes, timeline from `application_events`, editing fields
+3. Done: dashboard stats strip above the board (applied this week, response rate, by source)
+4. Done: interviews (`interviews` table, Interviews page with a "Next 7 days" section, adding one moves Saved/Applied apps to Interviewing). Still to do: reminders
+5. Done: contacts (`contacts` + `application_contacts`), Contacts page with search and a follow-up list, linking from the drawer
 6. Goals plus next-best-step recommendations (needs outcome data from `application_events`)
 7. Find jobs: AI-sourced postings from public boards and company sites (Supabase Edge Function)
 Out of scope for now: email/inbox sync.

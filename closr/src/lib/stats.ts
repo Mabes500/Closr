@@ -23,7 +23,7 @@ export interface Stats {
 }
 
 // YYYY-MM-DD in the user's own timezone, comparable with `applied_at`.
-function localDate(d: Date) {
+export function localDate(d: Date) {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }

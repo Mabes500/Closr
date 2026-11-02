@@ -8,6 +8,7 @@ import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Board from './pages/Board'
 import Interviews from './pages/Interviews'
+import Contacts from './pages/Contacts'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } })
 
@@ -52,6 +53,7 @@ export default function App() {
             >
               <Route index element={<Board />} />
               <Route path="interviews" element={<Interviews />} />
+              <Route path="contacts" element={<Contacts />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
