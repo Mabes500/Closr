@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { CircleCheck, Info, Link as LinkIcon } from 'lucide-react'
 import { useCreateApplication } from '../lib/applications'
+import { useCvVersions } from '../lib/cvVersions'
 import { parseJob } from '../lib/parseJob'
 import { localDate } from '../lib/stats'
 import { STATUS_LABEL, VISA_LABEL, type Application, type ApplicationStatus, type JobChannel, type VisaSponsorship, type WorkMode } from '../lib/types'
-import SalaryInput, { emptySalary, salaryValues, type SalaryDraft } from './SalaryInput'
+import CvVersionSelect from './CvVersionSelect'
+import SalaryInput,{ emptySalary, salaryValues, type SalaryDraft } from './SalaryInput'
 import { Button, Dialog, Input, Select, Switch, Tabs, TextArea } from './ui'
 
 type Tab = 'link' | 'quick'
@@ -51,6 +53,10 @@ export default function AddJobModal({
   const [salary, setSalary] = useState<SalaryDraft>(emptySalary)
   const [qt, setQt] = useState('')
   const [qc, setQc] = useState('')
+  // CV version sent: your first version in use, until you pick another (as in the prototype).
+  const { data: versions = [] } = useCvVersions()
+  const [cv, setCv] = useState<string | null | undefined>(undefined)
+  const cvId = cv === undefined ? (versions.find((v) => !v.archived_at)?.id ?? null) : cv
 
   // "I've already applied" picks Applied (or the later column it was opened from); off means Saved.
   const target: ApplicationStatus = !applied ? 'saved' : column && column !== 'saved' ? column : 'applied'
@@ -95,7 +101,11 @@ export default function AddJobModal({
   }
 
   async function save() {
-    const common = { status: target, applied_at: target === 'saved' ? null : localDate(new Date()) }
+    const common = {
+      status: target,
+      applied_at: target === 'saved' ? null : localDate(new Date()),
+      cv_version_id: target === 'saved' ? null : cvId,
+    }
     const created =
       tab === 'quick'
         ? await create.mutateAsync({ role: qt.trim(), company: qc.trim(), ...common })
@@ -221,6 +231,7 @@ export default function AddJobModal({
       )}
       {create.error && <p className="text-sm text-coral-700">{create.error.message}</p>}
       <Switch id="add-applied" label="I've already applied" checked={applied} onChange={setApplied} />
+      {applied && <CvVersionSelect id="add-cv" value={cvId} onChange={setCv} />}
     </Dialog>
   )
 }

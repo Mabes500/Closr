@@ -11,6 +11,7 @@ import { ForgotPassword, ResetSent } from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Board from './pages/Board'
 import Schedule from './pages/Schedule'
+import CvVersions from './pages/CvVersions'
 import ComingSoon from './pages/ComingSoon'
 import Onboarding from './pages/Onboarding'
 import Profile from './pages/Profile'
@@ -87,7 +88,7 @@ export default function App() {
               <Route path="goals" element={<ComingSoon screen="goals" />} />
               <Route path="checkins" element={<ComingSoon screen="checkins" />} />
               <Route path="schedule" element={<Schedule />} />
-              <Route path="cv" element={<ComingSoon screen="cv" />} />
+              <Route path="cv" element={<CvVersions />} />
               <Route path="import" element={<Import />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<ComingSoon screen="settings" />} />

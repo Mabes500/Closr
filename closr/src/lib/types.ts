@@ -92,6 +92,8 @@ export interface Application {
   salary: string | null
   // Set on jobs that came from a spreadsheet import; "Undo import" deletes by it.
   import_id: string | null
+  // The CV version sent for this job (roadmap 4.1); null = not recorded.
+  cv_version_id: string | null
   notes: string | null
   applied_at: string | null
   position: number
@@ -267,5 +269,21 @@ export type NewApplication = Pick<Application, 'company' | 'role'> &
       | 'next_action'
       | 'notes'
       | 'applied_at'
+      | 'cv_version_id'
     >
   >
+
+// CV/résumé versions (roadmap 4.1, prototype CVS). Archived ones are hidden from pickers.
+export interface CvVersion {
+  id: string
+  user_id: string
+  label: string
+  format: string | null
+  notes: string | null
+  archived_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+// The prototype's format choices.
+export const CV_FORMATS = ['UK/EU CV, no photo', 'US résumé, 1 page', 'Canada résumé', 'DACH CV, with photo'] as const

@@ -54,7 +54,7 @@ Do these first; everything later depends on them.
 - [x] **3.3 In-app notifications.** Bell + panel (`NotificationPanel`): interviews, overdue follow-ups, deadlines, check-ins, streaks. Read/unread. Includes the notification bell, which the prototype puts in the Sidebar header and the mobile top bar (deferred from 0.4, done). Built: interviews within 24h, follow-ups due or overdue, deadlines within 24h or overdue, created when the app loads. Check-in and streak notifications arrive with those features (Phase 4 and 5.1); email with 7.2.
 
 ## Phase 4: Check-ins and CV versions
-- [ ] **4.1 CV versions.** Label each CV/résumé version; pick the version when adding or editing a job; show response rate per version.
+- [x] **4.1 CV versions.** Label each CV/résumé version; pick the version when adding or editing a job; show response rate per version.
 - [ ] **4.2 Check-ins.** For applications quiet 7+ days, ask "how is it going": No reply yet / Interview / Rejected. One-tap answers update the stage; "No reply yet" offers a follow-up reminder.
 
 ## Phase 5: Goals

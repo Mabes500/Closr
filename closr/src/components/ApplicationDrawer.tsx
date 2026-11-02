@@ -20,6 +20,7 @@ import {
   type ApplicationStatus,
 } from '../lib/types'
 import ApplicationContacts from './ApplicationContacts'
+import CvVersionSelect from './CvVersionSelect'
 import RemChip from './RemChip'
 import SalaryInput, { salaryDraft, salaryValues } from './SalaryInput'
 import ScheduleDialog, { type ScheduleInit } from './ScheduleDialog'
@@ -187,6 +188,7 @@ export default function ApplicationDrawer({
             options={ORIGIN_SELECT}
           />
         )}
+        <CvVersionSelect id={`dc-${app.id}`} value={app.cv_version_id} onChange={(cv_version_id) => save({ cv_version_id })} wrapClassName="col-span-full" />
         <Input
           key={`dn-${app.id}`}
           id={`dn-${app.id}`}
