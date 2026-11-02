@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 /* Closr design tokens (light theme is the default). Use these via Tailwind
-   classes like bg-surface, text-ink, border-line, bg-brand, text-spark. */
-@theme {
+   classes like bg-surface, text-ink, border-line, bg-brand, text-spark.
+   `static` keeps every token in the build, even ones only read via var() at
+   runtime (e.g. the status dots use var(--color-status-${status})). */
+@theme static {
   --font-sans: "General Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "DM Mono", ui-monospace, monospace;
 
