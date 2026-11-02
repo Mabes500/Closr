@@ -2,6 +2,7 @@ import { useState, type DragEvent } from 'react'
 import { useApplications, useDeleteApplication, useMoveApplication } from '../lib/applications'
 import { STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
 import AddApplicationDialog from '../components/AddApplicationDialog'
+import StatsStrip from '../components/StatsStrip'
 
 export default function Board() {
   const { data: apps = [], isLoading, error } = useApplications()
@@ -40,6 +41,8 @@ export default function Board() {
       {isLoading ? (
         <p className="text-sm text-ink-muted">Loading…</p>
       ) : (
+        <>
+        <StatsStrip apps={apps} />
         <div className="grid grid-flow-col auto-cols-[minmax(240px,1fr)] gap-4 overflow-x-auto pb-4">
           {STATUSES.map((status) => {
             const items = apps.filter((a) => a.status === status)
@@ -80,6 +83,7 @@ export default function Board() {
             )
           })}
         </div>
+        </>
       )}
 
       {adding && <AddApplicationDialog defaultStatus={adding} onClose={() => setAdding(null)} />}

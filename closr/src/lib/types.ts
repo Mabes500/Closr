@@ -32,5 +32,19 @@ export interface Application {
   updated_at: string
 }
 
-export type NewApplication = Pick<Application, 'company' | 'role'> &
+export type ApplicationEventType = 'created' | 'status_change' | 'interview' | 'note'
+
+export interface ApplicationEvent {
+  id: string
+  application_id: string
+  user_id: string
+  type: ApplicationEventType
+  from_status: ApplicationStatus | null
+  to_status: ApplicationStatus | null
+  note: string | null
+  occurred_at: string
+  created_at: string
+}
+
+export type NewApplication =Pick<Application, 'company' | 'role'> &
   Partial<Pick<Application, 'job_url' | 'location' | 'work_mode' | 'status' | 'salary' | 'source' | 'notes' | 'applied_at'>>

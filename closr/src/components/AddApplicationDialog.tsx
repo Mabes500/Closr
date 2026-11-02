@@ -18,6 +18,7 @@ export default function AddApplicationDialog({
     job_url: '',
     location: '',
     work_mode: '' as WorkMode | '',
+    source: '',
     status: defaultStatus,
     applied_at: new Date().toISOString().slice(0, 10),
   })
@@ -31,6 +32,7 @@ export default function AddApplicationDialog({
       job_url: form.job_url.trim() || null,
       location: form.location.trim() || null,
       work_mode: form.work_mode || null,
+      source: form.source.trim() || null,
       status: form.status,
       applied_at: form.status === 'saved' ? null : form.applied_at || null,
     })
@@ -57,6 +59,13 @@ export default function AddApplicationDialog({
             <option value="onsite">Onsite</option>
           </select>
         </div>
+        {/* Free text with suggestions, so people can name any board or referrer. */}
+        <input list="sources" placeholder="Source (LinkedIn, referral…)" className={field} value={form.source} onChange={set('source')} />
+        <datalist id="sources">
+          {['LinkedIn', 'Referral', 'Company site', 'Indeed', 'Wellfound', 'Recruiter'].map((s) => (
+            <option key={s} value={s} />
+          ))}
+        </datalist>
         <div className="grid grid-cols-2 gap-3">
           <select className={field} value={form.status} onChange={set('status')}>
             {STATUSES.map((s) => (
