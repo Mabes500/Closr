@@ -25,6 +25,48 @@ export const CLOSE_REASON_LABEL: Record<CloseReason, string> = {
 
 export type WorkMode = 'remote' | 'hybrid' | 'onsite'
 
+export const WORK_MODE_LABEL: Record<WorkMode, string> = { remote: 'Remote', hybrid: 'Hybrid', onsite: 'Onsite' }
+
+export const VISA_OPTIONS = ['yes', 'no', 'unknown', 'not_needed'] as const
+export type VisaSponsorship = (typeof VISA_OPTIONS)[number]
+
+export const VISA_LABEL: Record<VisaSponsorship, string> = {
+  yes: 'Sponsors visa',
+  no: 'No sponsorship',
+  unknown: 'Unknown',
+  not_needed: 'Not needed',
+}
+
+// One list for both "source" (where the job was found) and "interview origin".
+export const JOB_CHANNELS = ['social', 'job_board', 'career_page', 'referral', 'recruiter', 'community', 'other'] as const
+export type JobChannel = (typeof JOB_CHANNELS)[number]
+
+export const SOURCE_LABEL: Record<JobChannel, string> = {
+  social: 'LinkedIn or X post',
+  job_board: 'Job board',
+  career_page: 'Company career page',
+  referral: 'Referral',
+  recruiter: 'Recruiter reached out',
+  community: 'Community',
+  other: 'Other',
+}
+
+// Wording and order from the prototype's "What got you this interview?" dialog.
+export const INTERVIEW_ORIGINS = ['referral', 'career_page', 'recruiter', 'social', 'community', 'job_board'] as const
+export const INTERVIEW_ORIGIN_LABEL: Record<JobChannel, string> = {
+  referral: 'Referral',
+  career_page: 'Applied on career page',
+  recruiter: 'Recruiter reached out',
+  social: 'LinkedIn or X post',
+  community: 'Community (Slack, Discord)',
+  job_board: 'Job board',
+  other: 'Other',
+}
+
+// Currencies offered in the UI (the prototype's list); the DB accepts any ISO 4217 code.
+export const CURRENCIES = ['USD', 'GBP', 'EUR', 'CAD', 'AUD', 'SGD'] as const
+export const CURRENCY_SYMBOL: Record<string, string> = { USD: '$', GBP: '£', EUR: '€', CAD: 'CA$', AUD: 'A$', SGD: 'S$' }
+
 export interface Application {
   id: string
   user_id: string
@@ -35,8 +77,19 @@ export interface Application {
   work_mode: WorkMode | null
   status: ApplicationStatus
   close_reason: CloseReason | null
+  time_zone: string | null
+  visa_sponsorship: VisaSponsorship
+  // Whole currency units per year.
+  salary_min: number | null
+  salary_max: number | null
+  salary_currency: string | null
+  source: JobChannel | null
+  // What was typed as the source before it became a fixed list (kept, not shown).
+  source_detail: string | null
+  interview_origin: JobChannel | null
+  next_action: string | null
+  // Legacy free-text salary from before salary_min/max; not shown.
   salary: string | null
-  source: string | null
   notes: string | null
   applied_at: string | null
   position: number
@@ -120,4 +173,22 @@ export interface ApplicationContact {
 }
 
 export type NewApplication = Pick<Application, 'company' | 'role'> &
-  Partial<Pick<Application, 'job_url' | 'location' | 'work_mode' | 'status' | 'salary' | 'source' | 'notes' | 'applied_at'>>
+  Partial<
+    Pick<
+      Application,
+      | 'job_url'
+      | 'location'
+      | 'work_mode'
+      | 'status'
+      | 'time_zone'
+      | 'visa_sponsorship'
+      | 'salary_min'
+      | 'salary_max'
+      | 'salary_currency'
+      | 'source'
+      | 'interview_origin'
+      | 'next_action'
+      | 'notes'
+      | 'applied_at'
+    >
+  >

@@ -44,7 +44,7 @@ export default function ContactDialog({ contact, onClose }: { contact?: Contact;
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/30 px-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/30 px-4" onClick={onClose}>
       <form
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}

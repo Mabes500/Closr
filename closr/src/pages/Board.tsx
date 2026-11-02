@@ -1,26 +1,31 @@
 import { useState, type DragEvent } from 'react'
-import { useApplications, useDeleteApplication, useMoveApplication } from '../lib/applications'
+import { useApplications, useDeleteApplication, useMoveApplication, useUpdateApplication } from '../lib/applications'
 import { CLOSE_REASON_LABEL, STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
-import AddApplicationDialog from '../components/AddApplicationDialog'
+import AddJobModal from '../components/AddJobModal'
 import StatsStrip from '../components/StatsStrip'
 import ApplicationDrawer from '../components/ApplicationDrawer'
+import ChannelModal from '../components/ChannelModal'
 import ReasonModal from '../components/ReasonModal'
 
 export default function Board() {
   const { data: apps = [], isLoading, error } = useApplications()
   const move = useMoveApplication()
+  const update = useUpdateApplication()
   const [adding, setAdding] = useState<ApplicationStatus | null>(null)
   const [dragOver, setDragOver] = useState<ApplicationStatus | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const [closing, setClosing] = useState<Application | null>(null)
+  const [asking, setAsking] = useState<Application | null>(null)
   const openApp = apps.find((a) => a.id === openId)
 
   // Moving to Closed asks for a reason first; cancelling leaves the card where it was.
+  // Moving to Interviewing asks what got you the interview (skippable), once per job.
   const changeStatus = (id: string, status: ApplicationStatus) => {
     const app = apps.find((a) => a.id === id)
     if (!app || app.status === status) return
-    if (status === 'closed') setClosing(app)
-    else move(id, status)
+    if (status === 'closed') return setClosing(app)
+    move(id, status)
+    if (status === 'interviewing' && !app.interview_origin) setAsking(app)
   }
 
   const onDrop = (status: ApplicationStatus) => (e: DragEvent) => {
@@ -44,7 +49,7 @@ export default function Board() {
           onClick={() => setAdding('applied')}
           className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover"
         >
-          + Add application
+          + Add a job
         </button>
       </div>
 
@@ -100,8 +105,25 @@ export default function Board() {
         </>
       )}
 
-      {adding && <AddApplicationDialog defaultStatus={adding} onClose={() => setAdding(null)} />}
-      {openApp && <ApplicationDrawer app={openApp} onClose={() => setOpenId(null)} />}
+      {adding && <AddJobModal column={adding} onClose={() => setAdding(null)} />}
+      {openApp && (
+        <ApplicationDrawer
+          app={openApp}
+          onClose={() => setOpenId(null)}
+          onChangeStatus={changeStatus}
+          escapeEnabled={!closing && !asking}
+        />
+      )}
+      {asking && (
+        <ChannelModal
+          app={asking}
+          onPick={(origin) => {
+            update.mutate({ id: asking.id, interview_origin: origin })
+            setAsking(null)
+          }}
+          onClose={() => setAsking(null)}
+        />
+      )}
       {closing && (
         <ReasonModal
           app={closing}

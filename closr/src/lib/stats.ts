@@ -1,5 +1,5 @@
 import type { StatusEvent } from './events'
-import type { Application, ApplicationStatus } from './types'
+import { SOURCE_LABEL, type Application, type ApplicationStatus } from './types'
 
 // Reaching either of these counts as hearing back, even if it is later Closed.
 const RESPONDED: ApplicationStatus[] = ['interviewing', 'offer']
@@ -65,7 +65,7 @@ export function computeStats(apps: Application[], events: StatusEvent[], now = n
     const responded = RESPONDED.includes(a.status) || reached.has(a.id)
     if (responded) stats.responded++
 
-    const label = a.source?.trim() || NO_SOURCE
+    const label = a.source ? SOURCE_LABEL[a.source] : NO_SOURCE
     const row = bySource.get(label.toLowerCase()) ?? { label, count: 0, responded: 0 }
     row.count++
     if (responded) row.responded++
