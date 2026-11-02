@@ -5,15 +5,19 @@ import { useAuth } from '../auth/AuthProvider'
 import { Logo } from '../components/Logo'
 
 export default function Login() {
-  const { session } = useAuth()
+  const { session, loading, authError } = useAuth()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
+  if (loading) return null
+  // Already signed in: / shows the board.
   if (session) return <Navigate to="/" replace />
 
-  const redirectTo = window.location.origin
+  // Return to the app root after Google or the email link; for a signed-in user that is the board.
+  // This URL must be listed under Supabase → Authentication → URL Configuration → Redirect URLs.
+  const redirectTo = `${window.location.origin}/`
 
   async function sendLink(e: FormEvent) {
     e.preventDefault()
@@ -73,7 +77,11 @@ export default function Login() {
               </form>
             </>
           )}
-          {error && <p className="mt-3 text-sm text-status-rejected">{error}</p>}
+          {(error ?? authError) && (
+            <p className="mt-3 text-sm text-status-rejected">
+              {error ?? `Sign-in didn't complete: ${authError}. Please try again.`}
+            </p>
+          )}
         </div>
       </div>
     </div>

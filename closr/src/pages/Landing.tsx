@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../auth/AuthProvider'
 import { Logo, Mark } from '../components/Logo'
 
 const columns = [
@@ -23,15 +24,18 @@ const features = [
 ]
 
 export default function Landing() {
+  // Signed-in visitors skip the sign-in page and go straight to the board.
+  const { session } = useAuth()
+  const start = session ? '/' : '/login'
   return (
     <div className="min-h-full bg-surface">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <Logo size={26} />
         <div className="flex items-center gap-3 text-sm">
-          <Link to="/login" className="font-medium text-ink-muted hover:text-ink">
+          <Link to={start} className="font-medium text-ink-muted hover:text-ink">
             Sign in
           </Link>
-          <Link to="/login" className="rounded-lg bg-brand px-4 py-2 font-medium text-white hover:bg-brand-hover">
+          <Link to={start} className="rounded-lg bg-brand px-4 py-2 font-medium text-white hover:bg-brand-hover">
             Get started free
           </Link>
         </div>
@@ -51,7 +55,7 @@ export default function Landing() {
           time closing offers.
         </p>
         <div className="mt-8 flex justify-center gap-3">
-          <Link to="/login" className="rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-hover">
+          <Link to={start} className="rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-hover">
             Start tracking, it's free
           </Link>
         </div>
@@ -99,7 +103,7 @@ export default function Landing() {
             for people in your field.
           </p>
           <Link
-            to="/login"
+            to={start}
             className="mt-8 inline-block rounded-lg bg-spark px-6 py-3 font-medium text-ink hover:brightness-95"
           >
             Get started free
@@ -112,7 +116,7 @@ export default function Landing() {
           <span className="inline-flex items-center gap-2">
             <Mark size={18} /> © {new Date().getFullYear()} Closr
           </span>
-          <Link to="/login" className="hover:text-ink">
+          <Link to={start} className="hover:text-ink">
             Sign in
           </Link>
         </div>

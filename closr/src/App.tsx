@@ -12,11 +12,13 @@ import Interviews from './pages/Interviews'
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } })
 
 function RequireAuth({ children }: { children: ReactNode }) {
-  const { session, loading } = useAuth()
+  const { session, loading, authError } = useAuth()
   const { pathname } = useLocation()
+  // Render nothing until the session is known, so signed-in users never glimpse the landing page.
   if (loading) return null
   // Signed-out visitors see the landing page at /, and are sent to sign in from any other app page.
-  if (!session) return pathname === '/' ? <Landing /> : <Navigate to="/login" replace />
+  // A failed sign-in redirect also goes to /login, where the error is shown.
+  if (!session) return pathname === '/' && !authError ? <Landing /> : <Navigate to="/login" replace />
   return children
 }
 
