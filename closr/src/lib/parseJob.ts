@@ -19,6 +19,8 @@ export interface ParsedJob {
   blocked: boolean
   source: string | null
   channel: JobChannel
+  // The page was deliberately not read (LinkedIn's terms don't allow it).
+  skipped?: 'linkedin'
 }
 
 export async function parseJob(url: string): Promise<ParsedJob> {

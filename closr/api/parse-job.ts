@@ -19,8 +19,11 @@ import { FetchError, checkUrl, safeFetch } from './_lib/safeFetch.js'
 //
 // Sources, earliest wins per field: the page's JSON-LD JobPosting, the Greenhouse /
 // Lever / Ashby public API when the link is one of theirs, the page's meta tags, and
-// finally what the link itself says. If the page can't be read (LinkedIn usually
-// blocks us) the answer still succeeds, with `blocked: true` and the link-based guesses.
+// finally what the link itself says. If the page can't be read the answer still
+// succeeds, with `blocked: true` and the link-based guesses.
+//
+// LinkedIn links are never fetched: LinkedIn's terms prohibit automated collection
+// (docs/JOBS-FEED-PLAN.md section 7). The link is kept and the user fills in the rest.
 
 export type ParseJobResponse = {
   fields: JobFields
@@ -32,6 +35,8 @@ export type ParseJobResponse = {
   source: string | null
   // The app's "source" choice for this link (job_board, social, career_page...).
   channel: string
+  // Set when the page was deliberately not read: 'linkedin'.
+  skipped?: 'linkedin'
 }
 
 const json = (status: number, body: unknown) =>
@@ -97,6 +102,19 @@ export async function POST(request: Request): Promise<Response> {
     url = checkUrl(raw.trim())
   } catch (e) {
     return json(400, { error: e instanceof FetchError ? e.message : 'That link can’t be read.' })
+  }
+
+  if (/(^|\.)linkedin\.com$/i.test(url.hostname)) {
+    const fields = merge(fromUrl(url))
+    const body: ParseJobResponse = {
+      fields,
+      found: FIELD_NAMES.filter((k) => fields[k] !== undefined),
+      blocked: true,
+      source: fields.title ? 'url' : null,
+      channel: channelFor(url),
+      skipped: 'linkedin',
+    }
+    return json(200, body)
   }
 
   const [page, ats] = await Promise.all([readPage(url.toString()), readAts(url)])

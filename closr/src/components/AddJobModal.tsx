@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { CircleCheck, Info, Link as LinkIcon } from 'lucide-react'
 import { useCreateApplication } from '../lib/applications'
 import { useCvVersions } from '../lib/cvVersions'
+import { registerBoards } from '../lib/jobBoards'
 import { parseJob } from '../lib/parseJob'
 import { localDate } from '../lib/stats'
 import { STATUS_LABEL, VISA_LABEL, type Application, type ApplicationStatus, type JobChannel, type VisaSponsorship, type WorkMode } from '../lib/types'
@@ -47,6 +48,8 @@ export default function AddJobModal({
   const [url, setUrl] = useState('')
   const [phase, setPhase] = useState<Phase>('idle')
   const [linkError, setLinkError] = useState('')
+  // LinkedIn links aren't read at all (its terms don't allow it); the user fills in the details.
+  const [skipped, setSkipped] = useState(false)
   const [channel, setChannel] = useState<JobChannel | null>(null)
   const [applied, setApplied] = useState(column !== 'saved')
   const [d, setD] = useState(BLANK)
@@ -84,6 +87,7 @@ export default function AddJobModal({
           : emptySalary,
       )
       setChannel(r.channel)
+      setSkipped(r.skipped === 'linkedin')
       setPhase(r.blocked ? 'blocked' : 'read')
     } catch (e) {
       const message = (e as Error).message
@@ -95,6 +99,7 @@ export default function AddJobModal({
       } else {
         setD(BLANK)
         setSalary(emptySalary)
+        setSkipped(false)
         setPhase('blocked')
       }
     }
@@ -124,6 +129,8 @@ export default function AddJobModal({
           })
     onClose()
     onAdded?.(created)
+    // A Greenhouse/Lever/Ashby link adds that company to the jobs feed (not awaited).
+    if (tab === 'link') void registerBoards([withScheme(url)])
   }
 
   return (
@@ -187,8 +194,10 @@ export default function AddJobModal({
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-[13px] font-semibold text-blue-700">
-                  <Info size={16} />
-                  We couldn’t read this page. Fill in the rest.
+                  <Info size={16} className="shrink-0" />
+                  {skipped
+                    ? 'LinkedIn doesn’t let other sites read its job pages, so we kept the link. Fill in the job title and company.'
+                    : 'We couldn’t read this page. Fill in the rest.'}
                 </div>
               )}
               <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
