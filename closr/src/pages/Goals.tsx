@@ -9,8 +9,9 @@ import { useCheckins } from '../lib/checkins'
 import { useCvVersions } from '../lib/cvVersions'
 import { useStatusEvents } from '../lib/events'
 import { PACE_ORDER, useWeekProgress, weeklyApplied } from '../lib/goals'
+import { usePeopleLikeYou } from '../lib/peers'
 import { usePlanDone, useTogglePlanStep, type PlanStep } from '../lib/plan'
-import { useUpdateProfile } from '../lib/profile'
+import { useProfile, useUpdateProfile } from '../lib/profile'
 import { useReminders } from '../lib/reminders'
 import { groupStats, MIN_TO_COMPARE, type GroupStats } from '../lib/stats'
 import { SOURCE_LABEL, type JobChannel } from '../lib/types'
@@ -73,8 +74,115 @@ export default function Goals() {
       </div>
 
       <Working />
+      <PeopleLikeYou />
     </div>
   )
+}
+
+// "People like you": where interviews and offers came from for others with a similar
+// target role, next to where your own applications went. Real totals only; hidden until
+// the group is big enough.
+function PeopleLikeYou() {
+  const navigate = useNavigate()
+  const { data: profile } = useProfile()
+  const { data: apps = [] } = useApplications()
+  const hasRoles = (profile?.target_roles.length ?? 0) > 0
+  const { data: rows, isLoading, error } = usePeopleLikeYou(hasRoles)
+
+  const sent = apps.filter((a) => a.status !== 'saved')
+  const mine = new Map<string, number>()
+  for (const a of sent) {
+    const src = a.interview_origin ?? a.source
+    if (src) mine.set(src, (mine.get(src) ?? 0) + 1)
+  }
+  const mineTotal = [...mine.values()].reduce((x, y) => x + y, 0)
+  const offers = rows?.reduce((x, r) => x + r.offers, 0) ?? 0
+  const interviews = rows?.reduce((x, r) => x + r.interviews, 0) ?? 0
+  // Bars show offers when there are any, otherwise interviews.
+  const measure = offers ? 'offers' : 'interviews'
+  const total = offers || interviews
+  const table = (rows ?? [])
+    .map((r) => ({
+      key: r.source,
+      label: r.source === 'other' ? 'Other' : (SOURCE_LABEL[r.source as JobChannel] ?? r.source),
+      them: total ? Math.round((r[measure] / total) * 100) : 0,
+      interviews: interviews ? Math.round((r.interviews / interviews) * 100) : 0,
+      you: mineTotal ? Math.round(((mine.get(r.source) ?? 0) / mineTotal) * 100) : 0,
+    }))
+    .sort((a, b) => b.them - a.them)
+  const peers = rows?.[0]?.peers ?? 0
+  const top = Math.max(1, ...table.map((r) => Math.max(r.them, r.you)))
+
+  return (
+    <Card className="flex flex-col gap-3.5 p-6">
+      <div>
+        <Eyebrow>People like you</Eyebrow>
+        <h2 className="mt-1.5 text-xl font-semibold leading-[1.25] tracking-[-0.02em] text-ink">
+          Where {total ? measure : 'interviews and offers'} came from for people in your field
+        </h2>
+      </div>
+      {!hasRoles ? (
+        <Sunken>
+          Add your target roles in your{' '}
+          <button type="button" onClick={() => navigate('/profile')} className="font-semibold text-blue-600 hover:underline">
+            profile
+          </button>{' '}
+          to compare with people looking for similar roles.
+        </Sunken>
+      ) : isLoading ? (
+        <p className="text-sm text-ink-500">Loading…</p>
+      ) : error || !table.length || !total ? (
+        <Sunken>This fills in as more people in your field use Closr.</Sunken>
+      ) : (
+        <>
+          <p className="text-sm leading-normal text-ink-500">
+            From <span className="font-mono">{peers}</span> people with a similar target role, over the last 12 months
+            {mineTotal ? (
+              <>
+                , compared with where your <span className="font-mono">{mineTotal}</span> applications came from.
+              </>
+            ) : (
+              '.'
+            )}{' '}
+            Totals only: nobody's jobs or names are shared.
+          </p>
+          <div className="flex gap-[18px] text-xs font-medium text-ink-500">
+            <span className="flex items-center gap-1.5">
+              <i className="size-2.5 rounded-[3px] bg-oxford-900" />
+              Their {measure}
+            </span>
+            {mineTotal > 0 && (
+              <span className="flex items-center gap-1.5">
+                <i className="size-2.5 rounded-[3px] bg-gold-500" />
+                Your applications
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {table.map((r) => (
+              <div
+                key={r.key}
+                className={`grid items-center gap-3 text-[13px] font-medium ${mineTotal ? 'grid-cols-[minmax(96px,170px)_1fr_40px_40px]' : 'grid-cols-[minmax(96px,170px)_1fr_40px]'}`}
+                title={measure === 'offers' ? `${r.interviews}% of their interviews` : undefined}
+              >
+                <span className="text-ink-700">{r.label}</span>
+                <div className="flex flex-col gap-[3px]">
+                  <span className="h-2 rounded-full bg-oxford-900" style={{ width: `${Math.max(1, (r.them / top) * 100)}%` }} />
+                  {mineTotal > 0 && <span className="h-2 rounded-full bg-gold-500" style={{ width: `${Math.max(1, (r.you / top) * 100)}%` }} />}
+                </div>
+                <span className="text-right font-mono text-ink">{r.them}%</span>
+                {mineTotal > 0 && <span className="text-right font-mono text-gold-800">{r.you}%</span>}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </Card>
+  )
+}
+
+function Sunken({ children }: { children: ReactNode }) {
+  return <div className="rounded-xl bg-paper-100 px-3.5 py-3 text-sm leading-normal text-ink-700">{children}</div>
 }
 
 // "Your plan this week": next best steps from your own data. A step shows while there's

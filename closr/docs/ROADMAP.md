@@ -60,7 +60,7 @@ Do these first; everything later depends on them.
 ## Phase 5: Goals
 - [x] **5.1 Weekly target and streak.** Target from weekly pace; raise/lower; streak of days the user touched their search. Includes the streak card in Sidebar (deferred from 0.4, done).
 - [x] **5.2 Goals screen.** Your plan this week, progress ring, consistency, what's working from the user's own data (sources, CV versions, response rates). Reuse `src/lib/stats.ts` from the old board stats strip (removed in 0.5). Decided: a response is reaching Interviewing or Offer, or closing as Rejected (as in the prototype); the same rule is used on CV Versions.
-- [ ] **5.3 "People like you".** Where offers came from for similar users. Needs enough anonymised aggregate data; ship with the user's own comparison first and a sample-data label until then. Plan separately.
+- [x] **5.3 "People like you".** Where offers came from for similar users. Built with real data only: a database function (`people_like_you`) returns anonymous totals for users sharing a target role, only when at least 20 of them exist (sources used by fewer than 5 fold into "Other"); otherwise Goals says "This fills in as more people in your field use Closr." No sample data is shown.
 
 ## Phase 6: Jobs feed
 - [ ] **6.1 Plan first** (separate session): which sources can be used legally (ATS public APIs such as Greenhouse, Lever, Ashby; company career pages), matching on roles, location, visa, time zone, salary floor; daily refresh. Role matching should use the role catalogue in `src/data/roles.ts`: match postings on the catalogue titles and their aliases (e.g. a "SWE" posting matches a user who chose "Software engineer"), and fall back to plain text for roles users typed that aren't in the catalogue.
