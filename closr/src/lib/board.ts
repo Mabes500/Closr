@@ -19,13 +19,12 @@ export const jobDays = (a: Application) => daysAgo(a.applied_at ?? a.created_at)
 // Applied, and no movement for two weeks (prototype `isStale`).
 export const isStale = (a: Application) => a.status === 'applied' && jobDays(a) >= STALE_DAYS
 
-// The soonest open interview from today on, per application.
-export function nextInterviews(reminders: ReminderWithApp[], now = new Date()) {
-  const today = new Date(now)
-  today.setHours(0, 0, 0, 0)
+// The next open reminder of any type, per application (prototype `nextRemFor`).
+// Overdue ones come first, so a missed follow-up shows (in red) on the card.
+export function nextReminders(reminders: ReminderWithApp[]) {
   const next = new Map<string, ReminderWithApp>()
   for (const r of reminders) {
-    if (r.type !== 'interview' || r.done || !r.application_id || new Date(whenDue(r)) < today) continue
+    if (r.done || !r.application_id) continue
     const cur = next.get(r.application_id)
     if (!cur || whenDue(r) < whenDue(cur)) next.set(r.application_id, r)
   }

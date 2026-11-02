@@ -1,4 +1,4 @@
-import { useEffect, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { ChevronDown, Plus, X, type LucideIcon } from 'lucide-react'
 
 // App building blocks matching docs/prototype.html's design system
@@ -350,6 +350,53 @@ export function Toast({
       <button type="button" aria-label="Dismiss" onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100">
         <X size={16} />
       </button>
+    </div>
+  )
+}
+
+// Small pop-up menu (prototype `Menu`). Place it inside a `relative` wrapper that also
+// holds the button opening it; clicks outside that wrapper, or Escape, close it.
+export type MenuItem = { label: string; icon?: LucideIcon; hint?: string; danger?: boolean; onClick: () => void } | '-'
+
+export function Menu({ open, onClose, head, items }: { open: boolean; onClose: () => void; head?: string; items: MenuItem[] }) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const down = (e: PointerEvent) => {
+      if (!ref.current?.parentElement?.contains(e.target as Node)) onClose()
+    }
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    document.addEventListener('pointerdown', down)
+    document.addEventListener('keydown', key)
+    return () => {
+      document.removeEventListener('pointerdown', down)
+      document.removeEventListener('keydown', key)
+    }
+  }, [open, onClose])
+  if (!open) return null
+  return (
+    <div ref={ref} role="menu" className="absolute right-0 top-[38px] z-50 flex min-w-[200px] flex-col rounded-[14px] border border-paper-200 bg-white p-1.5 shadow-dialog">
+      {head && <span className="px-2.5 pb-1 pt-1.5 text-[11px] font-semibold uppercase tracking-[.06em] text-ink-500">{head}</span>}
+      {items.map((it, i) => {
+        if (it === '-') return <span key={i} className="my-1 h-px bg-paper-200" />
+        const Icon = it.icon
+        return (
+          <button
+            key={i}
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onClose()
+              it.onClick()
+            }}
+            className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium hover:bg-paper-100 ${focusRing} ${it.danger ? 'text-coral-700' : 'text-ink'}`}
+          >
+            {Icon && <Icon size={16} className={it.danger ? '' : 'text-ink-500'} />}
+            <span className="flex-1">{it.label}</span>
+            {it.hint && <span className="font-mono text-xs text-ink-500">{it.hint}</span>}
+          </button>
+        )
+      })}
     </div>
   )
 }

@@ -50,7 +50,7 @@ Do these first; everything later depends on them.
 
 ## Phase 3: Schedule and reminders
 - [x] **3.1 Reminders.** Reminders table with types Follow up, Interview, Deadline, Reminder (`REM_TYPES`), linked to a job, with due time, done, snooze. Existing interviews migrate in.
-- [ ] **3.2 Schedule screen.** Overdue, today, later this week, later; filter by type; mark done; snooze. Next reminder chip on board cards. Replaces the old Contacts "Follow up" list; the drawer's "Follow up" badge should link to the reminder.
+- [x] **3.2 Schedule screen.** Overdue, today, later this week, later; filter by type; mark done; snooze. Next reminder chip on board cards. Replaces the old Contacts "Follow up" list; the drawer's "Follow up" badge should link to the reminder.
 - [ ] **3.3 In-app notifications.** Bell + panel (`NotificationPanel`): interviews, overdue follow-ups, deadlines, check-ins, streaks. Read/unread. Includes the notification bell, which the prototype puts in the Sidebar header and the mobile top bar (deferred from 0.4).
 
 ## Phase 4: Check-ins and CV versions

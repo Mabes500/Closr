@@ -6,8 +6,8 @@ import { Avatar, Button, Input, SectionTitle } from './ui'
 
 // Contacts section of the job drawer (prototype JobDrawer "Contacts"): linked people,
 // adding someone inline (saved at this company and linked straight away), and linking
-// someone already in your contacts.
-export default function ApplicationContacts({ app }: { app: Application }) {
+// someone already in your contacts. The "Follow up" badge opens the job's follow-up reminder.
+export default function ApplicationContacts({ app, onFollowUp }: { app: Application; onFollowUp: (contactName: string) => void }) {
   const { data: contacts = [] } = useContacts()
   const create = useCreateContact()
   const link = useLinkContact()
@@ -42,7 +42,16 @@ export default function ApplicationContacts({ app }: { app: Application }) {
               <div className="truncate text-sm font-semibold text-ink">{c.name}</div>
               <div className="truncate text-xs text-ink-500">{c.title || c.email || 'Contact'}</div>
             </div>
-            {f && <span className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 text-[11px] font-semibold text-gold-800">Follow up · {f.days}d</span>}
+            {f && (
+              <button
+                type="button"
+                onClick={() => onFollowUp(c.name)}
+                title="Open the follow-up reminder"
+                className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 text-[11px] font-semibold text-gold-800 hover:brightness-[.97]"
+              >
+                Follow up · {f.days}d
+              </button>
+            )}
             <button
               onClick={() => unlink.mutate({ application_id: app.id, contact_id: c.id })}
               aria-label={`Unlink ${c.name}`}

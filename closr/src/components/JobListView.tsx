@@ -1,10 +1,15 @@
-import { Calendar } from 'lucide-react'
 import { fmtTime, isStale, jobDays, relDay } from '../lib/board'
 import { ago, formatSalary } from '../lib/format'
 import { whenDue, type ReminderWithApp } from '../lib/reminders'
 import { STATUSES, type Application, type ApplicationStatus } from '../lib/types'
+import { REM_META, isOverdue } from './RemChip'
 import StageSelect from './StageSelect'
 import { Card, CompanyTile } from './ui'
+
+function NextIcon({ r }: { r: ReminderWithApp }) {
+  const Icon = REM_META[r.type].icon
+  return <Icon size={14} />
+}
 
 const th = 'whitespace-nowrap border-b border-paper-200 bg-paper-50 px-3.5 py-2.5 text-left text-xs font-semibold text-ink-500'
 const td = 'px-3.5 py-2.5 group-hover:bg-paper-100 group-focus-visible:bg-paper-100'
@@ -73,8 +78,8 @@ export default function JobListView({
                   </td>
                   <td className={`${td} whitespace-nowrap text-ink-700`}>
                     {r ? (
-                      <span className="inline-flex items-center gap-1.5">
-                        <Calendar size={14} />
+                      <span className={`inline-flex items-center gap-1.5 ${isOverdue(r) ? 'font-semibold text-coral-700' : ''}`}>
+                        <NextIcon r={r} />
                         {relDay(whenDue(r))}, {fmtTime(whenDue(r))}
                       </span>
                     ) : (

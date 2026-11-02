@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Calendar, Clock } from 'lucide-react'
-import { isStale, jobDays, relDay } from '../lib/board'
+import { Clock } from 'lucide-react'
+import { isStale, jobDays } from '../lib/board'
 import { ago, formatSalary } from '../lib/format'
-import { whenDue, type ReminderWithApp } from '../lib/reminders'
+import type { ReminderWithApp } from '../lib/reminders'
 import { CLOSE_REASON_LABEL, VISA_LABEL, WORK_MODE_LABEL, type Application, type ApplicationStatus } from '../lib/types'
+import RemChip from './RemChip'
 import StageSelect from './StageSelect'
 import { Badge, CompanyTile } from './ui'
 
@@ -30,12 +31,13 @@ export function JobTags({ app }: { app: Application }) {
 // Board card (prototype `JobCard`). Closed cards are dimmed and show their reason.
 export default function JobCard({
   app,
-  nextInterview,
+  nextRem,
   onOpen,
   onChangeStatus,
 }: {
   app: Application
-  nextInterview?: ReminderWithApp
+  // The job's next open reminder (prototype RemChip on the card).
+  nextRem?: ReminderWithApp
   onOpen: () => void
   // The board's changeStatus, the same path as drag-and-drop.
   onChangeStatus: (id: string, status: ApplicationStatus) => void
@@ -82,13 +84,7 @@ export default function JobCard({
         </div>
         <StageSelect app={app} onChange={onChangeStatus} onPicking={setPicking} />
       </div>
-      {nextInterview && (
-        <div className="flex items-center gap-1.5 rounded-lg bg-gold-100 px-2 py-1.5 text-xs font-medium leading-[1.2] text-gold-800">
-          <Calendar size={13} className="shrink-0" />
-          <span className="min-w-0 flex-1 truncate">{nextInterview.title}</span>
-          <span className="font-mono">{relDay(whenDue(nextInterview))}</span>
-        </div>
-      )}
+      {nextRem && <RemChip r={nextRem} compact />}
       <div className="flex items-center gap-2 text-xs leading-none text-ink-500">
         {foot ? (
           <span>{foot}</span>

@@ -10,7 +10,7 @@ import Signup from './pages/Signup'
 import { ForgotPassword, ResetSent } from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Board from './pages/Board'
-import Interviews from './pages/Interviews'
+import Schedule from './pages/Schedule'
 import ComingSoon from './pages/ComingSoon'
 import Onboarding from './pages/Onboarding'
 import Profile from './pages/Profile'
@@ -83,12 +83,10 @@ export default function App() {
               }
             >
               <Route index element={<Board />} />
-              {/* Reached from the Schedule placeholder until Schedule is built (Phase 3). */}
-              <Route path="interviews" element={<Interviews />} />
               <Route path="jobs" element={<ComingSoon screen="jobs" />} />
               <Route path="goals" element={<ComingSoon screen="goals" />} />
               <Route path="checkins" element={<ComingSoon screen="checkins" />} />
-              <Route path="schedule" element={<ComingSoon screen="schedule" />} />
+              <Route path="schedule" element={<Schedule />} />
               <Route path="cv" element={<ComingSoon screen="cv" />} />
               <Route path="import" element={<Import />} />
               <Route path="profile" element={<Profile />} />

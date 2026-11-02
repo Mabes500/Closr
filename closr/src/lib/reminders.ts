@@ -78,6 +78,15 @@ export function plusDays(n: number, hour = 9) {
   d.setHours(hour, 0, 0, 0)
   return d
 }
+// Snooze choices (prototype ReminderRow menu): +3 hours, or a number of days at 09:00.
+export type SnoozeChoice = 'h3' | 1 | 3 | 7
+export function snoozeUntil(choice: SnoozeChoice) {
+  if (choice !== 'h3') return plusDays(choice)
+  const d = new Date()
+  d.setHours(d.getHours() + 3, d.getMinutes(), 0, 0)
+  return d
+}
+
 export function nextMonday(hour = 9) {
   const d = plusDays(1, hour)
   while (d.getDay() !== 1) d.setDate(d.getDate() + 1)

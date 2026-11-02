@@ -214,7 +214,13 @@ export default function ApplicationDrawer({
       </div>
       {update.error && <p className="text-sm text-coral-700">{update.error.message}</p>}
 
-      <ApplicationContacts app={app} />
+      <ApplicationContacts
+        app={app}
+        // The job's open follow-up if there is one, otherwise a new one for this person.
+        onFollowUp={(name) =>
+          setEditing(upcoming.find((r) => r.type === 'follow') ?? { type: 'follow', application_id: app.id, title: `Follow up with ${name}` })
+        }
+      />
       <History applicationId={app.id} />
 
       {/* Cards no longer carry a Delete button (as in the prototype), so it lives here. */}

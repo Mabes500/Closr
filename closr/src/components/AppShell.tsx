@@ -39,9 +39,6 @@ export const NAV: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/import', label: 'Spreadsheet Import', icon: Upload },
 ]
 
-// Pages without their own nav entry highlight their parent.
-const NAV_PARENT: Record<string, string> = { '/interviews': '/schedule' }
-
 function useIsNarrow() {
   const query = '(max-width: 860px)'
   const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches)
@@ -102,7 +99,7 @@ function Sidebar({ onClose, onSignOut }: { onClose?: () => void; onSignOut: () =
   const meta = session?.user.user_metadata ?? {}
   const email = session?.user.email ?? ''
   const name: string = profile?.full_name || meta.full_name || meta.name || email.split('@')[0] || 'You'
-  const current = NAV_PARENT[pathname] ?? pathname
+  const current = pathname
   const counts: Record<string, number> = { '/': apps.filter((a) => a.status !== 'closed').length }
   const inAccount = pathname === '/profile' || pathname === '/settings'
 

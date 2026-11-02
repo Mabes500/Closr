@@ -2,7 +2,7 @@ import { useState, type DragEvent } from 'react'
 import { Briefcase, FileSpreadsheet, Link as LinkIcon, Plus, Search, Send, Upload } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useApplications, useMoveApplication, useUpdateApplication } from '../lib/applications'
-import { isStale, nextInterviews } from '../lib/board'
+import { isStale, nextReminders } from '../lib/board'
 import { plusDays, useReminders } from '../lib/reminders'
 import { useProfile } from '../lib/profile'
 import { STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
@@ -65,14 +65,15 @@ export default function Board() {
   const location = useLocation()
   const [adding, setAdding] = useState(() => (location.state as { add?: string } | null)?.add === 'link')
   const [dragOver, setDragOver] = useState<ApplicationStatus | null>(null)
-  const [openId, setOpenId] = useState<string | null>(null)
+  // Schedule's "Open job" arrives with state { open: id }.
+  const [openId, setOpenId] = useState<string | null>(() => (location.state as { open?: string } | null)?.open ?? null)
   const [closing, setClosing] = useState<Application | null>(null)
   const [asking, setAsking] = useState<Application | null>(null)
   const [offer, setOffer] = useState<Pick<Application, 'id' | 'company'> | null>(null)
   const [scheduling, setScheduling] = useState<ScheduleInit | null>(null)
   const { data: profile } = useProfile()
   const openApp = apps.find((a) => a.id === openId)
-  const next = nextInterviews(reminders)
+  const next = nextReminders(reminders)
 
   // Marked Applied → offer a follow-up a week out, unless turned off in Profile or one exists.
   const offerFollowUp = (app: Pick<Application, 'id' | 'company'>) => {
@@ -244,7 +245,7 @@ export default function Board() {
                       <JobCard
                         key={a.id}
                         app={a}
-                        nextInterview={next.get(a.id)}
+                        nextRem={next.get(a.id)}
                         onOpen={() => setOpenId(a.id)}
                         onChangeStatus={changeStatus}
                       />
@@ -275,7 +276,10 @@ export default function Board() {
       {openApp && (
         <ApplicationDrawer
           app={openApp}
-          onClose={() => setOpenId(null)}
+          onClose={() => {
+            setOpenId(null)
+            if (location.state) navigate(location.pathname, { replace: true, state: null })
+          }}
           onChangeStatus={changeStatus}
           escapeEnabled={!closing && !asking && !scheduling}
         />
