@@ -68,7 +68,8 @@ export default function AddApplicationDialog({
         </datalist>
         <div className="grid grid-cols-2 gap-3">
           <select className={field} value={form.status} onChange={set('status')}>
-            {STATUSES.map((s) => (
+            {/* Closed needs a reason, so it's set by moving a card, not when adding. */}
+            {STATUSES.filter((s) => s !== 'closed').map((s) => (
               <option key={s} value={s}>
                 {STATUS_LABEL[s]}
               </option>

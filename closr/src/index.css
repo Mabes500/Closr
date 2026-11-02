@@ -27,12 +27,19 @@
   --color-status-applied: #2346D9;
   --color-status-interviewing: #E9A100;
   --color-status-offer: #1F9D61;
+  --color-status-closed: #A9BAD4;
+  /* No longer a stage; still the app's error/destructive red. */
   --color-status-rejected: #D14343;
 
   /* Palette from docs/prototype.html, named as there (e.g. --oxford-900 → bg-oxford-900).
      Screens rebuilt to match the prototype use these. */
   --color-oxford-900: #002147;
   --color-oxford-800: #0E3360;
+  --color-oxford-600: #3E6596;
+  --color-oxford-300: #A9BAD4;
+  --color-oxford-100: #E6ECF5;
+  --color-overlay: rgb(0 21 46 / 0.42);
+  --shadow-dialog: 0 4px 8px rgb(0 33 71 / 0.06), 0 18px 40px rgb(0 33 71 / 0.12);
   --color-paper-50: #FBF8F3;
   --color-paper-100: #F5F0E8;
   --color-paper-200: #ECE5DA;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { groupInterviews, useInterviews } from '../lib/interviews'
-import { STATUS_LABEL, type Application, type Interview } from '../lib/types'
+import { CLOSE_REASON_LABEL, STATUS_LABEL, type Application, type Interview } from '../lib/types'
 import ApplicationContacts from './ApplicationContacts'
 import InterviewDialog from './InterviewDialog'
 import InterviewRow from './InterviewRow'
@@ -33,6 +33,7 @@ export default function ApplicationDrawer({ app, onClose }: { app: Application; 
               <span className="flex items-center gap-1.5 rounded bg-canvas px-1.5 py-0.5 text-ink">
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: `var(--color-status-${app.status})` }} />
                 {STATUS_LABEL[app.status]}
+                {app.close_reason && ` · ${CLOSE_REASON_LABEL[app.close_reason]}`}
               </span>
               {app.work_mode && <span className="rounded bg-canvas px-1.5 py-0.5 capitalize">{app.work_mode}</span>}
               {app.location && <span>{app.location}</span>}

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from './supabase'
-import type { Application, ApplicationStatus, NewApplication } from './types'
+import type { Application, ApplicationStatus, CloseReason, NewApplication } from './types'
 
 const KEY = ['applications'] as const
 
@@ -49,10 +49,11 @@ export function useUpdateApplication() {
   })
 }
 
+// Closed needs a reason; any other stage clears it (the DB rejects a mismatch).
 export function useMoveApplication() {
   const update = useUpdateApplication()
-  return (id: string, status: ApplicationStatus) =>
-    update.mutate({ id, status, position: Date.now() / 1000 })
+  return (id: string, status: ApplicationStatus, reason: CloseReason | null = null) =>
+    update.mutate({ id, status, close_reason: status === 'closed' ? reason : null, position: Date.now() / 1000 })
 }
 
 export function useDeleteApplication() {

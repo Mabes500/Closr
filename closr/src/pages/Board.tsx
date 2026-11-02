@@ -1,9 +1,10 @@
 import { useState, type DragEvent } from 'react'
 import { useApplications, useDeleteApplication, useMoveApplication } from '../lib/applications'
-import { STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
+import { CLOSE_REASON_LABEL, STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
 import AddApplicationDialog from '../components/AddApplicationDialog'
 import StatsStrip from '../components/StatsStrip'
 import ApplicationDrawer from '../components/ApplicationDrawer'
+import ReasonModal from '../components/ReasonModal'
 
 export default function Board() {
   const { data: apps = [], isLoading, error } = useApplications()
@@ -11,17 +12,24 @@ export default function Board() {
   const [adding, setAdding] = useState<ApplicationStatus | null>(null)
   const [dragOver, setDragOver] = useState<ApplicationStatus | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
+  const [closing, setClosing] = useState<Application | null>(null)
   const openApp = apps.find((a) => a.id === openId)
+
+  // Moving to Closed asks for a reason first; cancelling leaves the card where it was.
+  const changeStatus = (id: string, status: ApplicationStatus) => {
+    const app = apps.find((a) => a.id === id)
+    if (!app || app.status === status) return
+    if (status === 'closed') setClosing(app)
+    else move(id, status)
+  }
 
   const onDrop = (status: ApplicationStatus) => (e: DragEvent) => {
     e.preventDefault()
     setDragOver(null)
-    const id = e.dataTransfer.getData('text/plain')
-    const app = apps.find((a) => a.id === id)
-    if (app && app.status !== status) move(id, status)
+    changeStatus(e.dataTransfer.getData('text/plain'), status)
   }
 
-  const active = apps.filter((a) => a.status !== 'saved' && a.status !== 'rejected').length
+  const active = apps.filter((a) => a.status !== 'saved' && a.status !== 'closed').length
 
   return (
     <div className="px-6 py-6">
@@ -68,17 +76,20 @@ export default function Board() {
                     <h2 className="text-sm font-semibold">{STATUS_LABEL[status]}</h2>
                     <span className="font-mono text-xs text-ink-faint">{items.length}</span>
                   </div>
-                  <button
-                    onClick={() => setAdding(status)}
-                    className="rounded px-1.5 text-ink-faint hover:bg-canvas hover:text-ink"
-                    aria-label={`Add to ${STATUS_LABEL[status]}`}
-                  >
-                    +
-                  </button>
+                  {/* New jobs can't start out Closed: closing one needs a reason. */}
+                  {status !== 'closed' && (
+                    <button
+                      onClick={() => setAdding(status)}
+                      className="rounded px-1.5 text-ink-faint hover:bg-canvas hover:text-ink"
+                      aria-label={`Add to ${STATUS_LABEL[status]}`}
+                    >
+                      +
+                    </button>
+                  )}
                 </header>
                 <div className="flex flex-col gap-2">
                   {items.map((a) => (
-                    <Card key={a.id} app={a} onMove={move} onOpen={() => setOpenId(a.id)} />
+                    <Card key={a.id} app={a} onMove={changeStatus} onOpen={() => setOpenId(a.id)} />
                   ))}
                   {items.length === 0 && <p className="px-1 py-6 text-center text-xs text-ink-faint">Drop here</p>}
                 </div>
@@ -91,6 +102,16 @@ export default function Board() {
 
       {adding && <AddApplicationDialog defaultStatus={adding} onClose={() => setAdding(null)} />}
       {openApp && <ApplicationDrawer app={openApp} onClose={() => setOpenId(null)} />}
+      {closing && (
+        <ReasonModal
+          app={closing}
+          onPick={(reason) => {
+            move(closing.id, 'closed', reason)
+            setClosing(null)
+          }}
+          onClose={() => setClosing(null)}
+        />
+      )}
     </div>
   )
 }
@@ -105,13 +126,15 @@ function Card({
   onOpen: () => void
 }) {
   const del = useDeleteApplication()
+  const closed = app.status === 'closed'
   return (
     <article
       draggable
       onDragStart={(e) => e.dataTransfer.setData('text/plain', app.id)}
       // Clicks on the card's own link, status select and delete button shouldn't open the drawer.
       onClick={(e) => !(e.target as HTMLElement).closest('a, button, select') && onOpen()}
-      className="group cursor-grab rounded-lg border border-line bg-surface p-3 shadow-sm active:cursor-grabbing"
+      // Closed cards are dimmed, as in the prototype's JobCard.
+      className={`group cursor-grab rounded-lg border border-line bg-surface p-3 shadow-sm active:cursor-grabbing ${closed ? 'opacity-[.72]' : ''}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -127,8 +150,12 @@ function Card({
       <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-ink-faint">
         {app.work_mode && <span className="rounded bg-canvas px-1.5 py-0.5 capitalize">{app.work_mode}</span>}
         {app.location && <span className="truncate">{app.location}</span>}
-        {app.applied_at && <span className="ml-auto font-mono">{app.applied_at}</span>}
+        {app.applied_at && !closed && <span className="ml-auto font-mono">{app.applied_at}</span>}
       </div>
+      {/* JobCard's footer shows the close reason in place of the applied date. */}
+      {closed && (
+        <p className="mt-2 text-xs text-ink-500">{app.close_reason ? CLOSE_REASON_LABEL[app.close_reason] : 'Closed'}</p>
+      )}
       {/* Status select doubles as the mobile-friendly alternative to drag-and-drop. */}
       <div className="mt-2 flex items-center justify-between opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
         <select

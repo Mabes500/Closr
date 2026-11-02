@@ -1,7 +1,7 @@
 import type { StatusEvent } from './events'
 import type { Application, ApplicationStatus } from './types'
 
-// Reaching either of these counts as hearing back, even if it later ends in Rejected.
+// Reaching either of these counts as hearing back, even if it is later Closed.
 const RESPONDED: ApplicationStatus[] = ['interviewing', 'offer']
 
 export const NO_SOURCE = 'Not set'

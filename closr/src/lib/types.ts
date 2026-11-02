@@ -1,7 +1,7 @@
 // Mirrors supabase/migrations. When the schema changes, update this file
 // (or regenerate with: npx supabase gen types typescript --linked > src/lib/database.types.ts).
 
-export const STATUSES = ['saved', 'applied', 'interviewing', 'offer', 'rejected'] as const
+export const STATUSES = ['saved', 'applied', 'interviewing', 'offer', 'closed'] as const
 export type ApplicationStatus = (typeof STATUSES)[number]
 
 export const STATUS_LABEL: Record<ApplicationStatus, string> = {
@@ -9,7 +9,18 @@ export const STATUS_LABEL: Record<ApplicationStatus, string> = {
   applied: 'Applied',
   interviewing: 'Interviewing',
   offer: 'Offer',
+  closed: 'Closed',
+}
+
+// Every closed application has one of these (enforced by a DB check constraint).
+export const CLOSE_REASONS = ['rejected', 'no_response', 'withdrew', 'declined_offer'] as const
+export type CloseReason = (typeof CLOSE_REASONS)[number]
+
+export const CLOSE_REASON_LABEL: Record<CloseReason, string> = {
   rejected: 'Rejected',
+  no_response: 'No response',
+  withdrew: 'Withdrew',
+  declined_offer: 'Declined offer',
 }
 
 export type WorkMode = 'remote' | 'hybrid' | 'onsite'
@@ -23,6 +34,7 @@ export interface Application {
   location: string | null
   work_mode: WorkMode | null
   status: ApplicationStatus
+  close_reason: CloseReason | null
   salary: string | null
   source: string | null
   notes: string | null
@@ -41,6 +53,7 @@ export interface ApplicationEvent {
   type: ApplicationEventType
   from_status: ApplicationStatus | null
   to_status: ApplicationStatus | null
+  close_reason: CloseReason | null
   note: string | null
   occurred_at: string
   created_at: string
