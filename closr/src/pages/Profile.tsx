@@ -3,7 +3,7 @@ import { Check, Loader, MapPin, RotateCcw, Wallet } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import RolePicker from '../components/RolePicker'
-import { Avatar, Button, Input, Select, ToggleChip } from '../components/ui'
+import { Avatar, Button, Input, Select, Switch, ToggleChip } from '../components/ui'
 import { PACES, PACE_OPTIONS, STAGE_OPTIONS } from '../lib/onboarding'
 import { useProfile, useUpdateProfile } from '../lib/profile'
 import { PACE_TARGET, WORK_MODE_LABEL, type IdealStart, type Profile as ProfileRow, type WorkMode } from '../lib/types'
@@ -202,6 +202,24 @@ export default function Profile() {
                   </button>
                 )
               })}
+            </div>
+          </section>
+
+          {/* Prototype ProfileScreen's "Reminders" card; more toggles arrive with email (7.2). */}
+          <section className={`${card} gap-1.5`}>
+            <h2 className={`${h2} mb-2`}>Reminders</h2>
+            <div className="flex items-center gap-4 border-t border-paper-200 py-3">
+              <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                <span className="text-sm font-semibold leading-[1.3] text-ink">Suggest follow-ups</span>
+                <span className="text-[13px] leading-[1.4] text-ink-500">When you mark a job Applied, offer a follow-up reminder a week later.</span>
+              </div>
+              <Switch
+                id="pf-suggest-follow"
+                label=""
+                ariaLabel="Suggest follow-ups"
+                checked={profile.suggest_follow_ups}
+                onChange={(v) => save({ suggest_follow_ups: v })}
+              />
             </div>
           </section>
 

@@ -3,7 +3,7 @@ import { CircleCheck, Info, Link as LinkIcon } from 'lucide-react'
 import { useCreateApplication } from '../lib/applications'
 import { parseJob } from '../lib/parseJob'
 import { localDate } from '../lib/stats'
-import { STATUS_LABEL, VISA_LABEL, type ApplicationStatus, type JobChannel, type VisaSponsorship, type WorkMode } from '../lib/types'
+import { STATUS_LABEL, VISA_LABEL, type Application, type ApplicationStatus, type JobChannel, type VisaSponsorship, type WorkMode } from '../lib/types'
 import SalaryInput, { emptySalary, salaryValues, type SalaryDraft } from './SalaryInput'
 import { Button, Dialog, Input, Select, Switch, Tabs, TextArea } from './ui'
 
@@ -30,7 +30,16 @@ const withScheme = (u: string) => (/^https?:\/\//i.test(u.trim()) ? u.trim() : `
 // Prototype `AddJobModal`. Paste link reads the posting through /api/parse-job and
 // pre-fills a form to check before saving; Quick add needs only title and company.
 // `column` is the board column the user added from, if any.
-export default function AddJobModal({ column, onClose }: { column?: ApplicationStatus; onClose: () => void }) {
+export default function AddJobModal({
+  column,
+  onClose,
+  onAdded,
+}: {
+  column?: ApplicationStatus
+  onClose: () => void
+  // Told about the new job (the board offers a follow-up when it was added as Applied).
+  onAdded?: (app: Application) => void
+}) {
   const create = useCreateApplication()
   const [tab, setTab] = useState<Tab>('link')
   const [url, setUrl] = useState('')
@@ -87,22 +96,24 @@ export default function AddJobModal({ column, onClose }: { column?: ApplicationS
 
   async function save() {
     const common = { status: target, applied_at: target === 'saved' ? null : localDate(new Date()) }
-    if (tab === 'quick') await create.mutateAsync({ role: qt.trim(), company: qc.trim(), ...common })
-    else
-      await create.mutateAsync({
-        role: d.title.trim(),
-        company: d.company.trim(),
-        // The link is always kept, even when the page couldn't be read.
-        job_url: withScheme(url),
-        location: d.location.trim() || null,
-        work_mode: d.mode || null,
-        visa_sponsorship: d.visa,
-        source: channel,
-        notes: d.notes.trim() || null,
-        ...salaryValues(salary),
-        ...common,
-      })
+    const created =
+      tab === 'quick'
+        ? await create.mutateAsync({ role: qt.trim(), company: qc.trim(), ...common })
+        : await create.mutateAsync({
+            role: d.title.trim(),
+            company: d.company.trim(),
+            // The link is always kept, even when the page couldn't be read.
+            job_url: withScheme(url),
+            location: d.location.trim() || null,
+            work_mode: d.mode || null,
+            visa_sponsorship: d.visa,
+            source: channel,
+            notes: d.notes.trim() || null,
+            ...salaryValues(salary),
+            ...common,
+          })
     onClose()
+    onAdded?.(created)
   }
 
   return (

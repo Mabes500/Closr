@@ -1,4 +1,4 @@
-import type { InterviewWithApp } from '../lib/interviews'
+import { whenDue, type ReminderWithApp } from '../lib/reminders'
 import { FORMAT_LABEL, OUTCOME_LABEL, type InterviewOutcome } from '../lib/types'
 
 const OUTCOME_CLASS: Record<InterviewOutcome, string> = {
@@ -8,18 +8,19 @@ const OUTCOME_CLASS: Record<InterviewOutcome, string> = {
   cancelled: 'bg-canvas text-ink-faint',
 }
 
-// One interview as a clickable row. `showCompany` is off inside the drawer,
+// One interview reminder as a clickable row (temporary Interviews page, until Schedule). `showCompany` is off inside the drawer,
 // where the application is already obvious.
 export default function InterviewRow({
   interview: i,
   showCompany = true,
   onClick,
 }: {
-  interview: InterviewWithApp
+  interview: ReminderWithApp
   showCompany?: boolean
   onClick: () => void
 }) {
-  const when = new Date(i.scheduled_at)
+  const when = new Date(whenDue(i))
+  const outcome = i.interview_outcome ?? 'pending'
   return (
     <button
       onClick={onClick}
@@ -30,18 +31,18 @@ export default function InterviewRow({
         <p className="text-ink-faint">{when.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</p>
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">{i.round_name}</p>
+        <p className="truncate text-sm font-semibold">{i.title}</p>
         {showCompany && i.application && (
           <p className="truncate text-sm text-ink-muted">
             {i.application.company} · {i.application.role}
           </p>
         )}
         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-ink-faint">
-          {i.format && <span className="rounded bg-canvas px-1.5 py-0.5">{FORMAT_LABEL[i.format]}</span>}
+          {i.interview_format && <span className="rounded bg-canvas px-1.5 py-0.5">{FORMAT_LABEL[i.interview_format]}</span>}
           {i.interviewer && <span className="truncate">with {i.interviewer}</span>}
         </div>
       </div>
-      <span className={`shrink-0 rounded px-1.5 py-0.5 text-xs ${OUTCOME_CLASS[i.outcome]}`}>{OUTCOME_LABEL[i.outcome]}</span>
+      <span className={`shrink-0 rounded px-1.5 py-0.5 text-xs ${OUTCOME_CLASS[outcome]}`}>{OUTCOME_LABEL[outcome]}</span>
     </button>
   )
 }

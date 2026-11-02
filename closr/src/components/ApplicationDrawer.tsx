@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { CalendarPlus, Send, Trash2 } from 'lucide-react'
 import { useDeleteApplication, useUpdateApplication } from '../lib/applications'
 import { isStale, jobDays } from '../lib/board'
 import { useApplicationHistory } from '../lib/events'
 import { ago, daysAgo } from '../lib/format'
-import { groupInterviews, useInterviews } from '../lib/interviews'
+import { useReminders, whenDue } from '../lib/reminders'
 import {
   CLOSE_REASON_LABEL,
   INTERVIEW_ORIGINS,
@@ -18,13 +18,12 @@ import {
   type Application,
   type ApplicationEvent,
   type ApplicationStatus,
-  type Interview,
 } from '../lib/types'
 import ApplicationContacts from './ApplicationContacts'
-import InterviewDialog from './InterviewDialog'
-import InterviewRow from './InterviewRow'
+import RemChip from './RemChip'
 import SalaryInput, { salaryDraft, salaryValues } from './SalaryInput'
-import { CompanyTile, Drawer, Field, Input, SectionTitle, Select, Tabs, TextArea } from './ui'
+import ScheduleDialog, { type ScheduleInit } from './ScheduleDialog'
+import { Button, CompanyTile, Drawer, Field, Input, SectionTitle, Select, Tabs, TextArea } from './ui'
 
 const MODE_OPTIONS = [
   { value: '', label: 'Not set' },
@@ -55,11 +54,13 @@ export default function ApplicationDrawer({
 }) {
   const update = useUpdateApplication()
   const remove = useDeleteApplication()
-  const { data: allInterviews = [] } = useInterviews()
-  const [editing, setEditing] = useState<Interview | 'new' | null>(null)
+  const { data: reminders = [] } = useReminders()
+  const [editing, setEditing] = useState<ScheduleInit | null>(null)
   const [salary, setSalary] = useState(() => salaryDraft(app))
-  const { next7, later } = groupInterviews(allInterviews.filter((i) => i.application_id === app.id))
-  const upcoming = [...next7, ...later]
+  // This job's open reminders, soonest (or most overdue) first.
+  const upcoming = reminders
+    .filter((r) => r.application_id === app.id && !r.done)
+    .sort((a, b) => whenDue(a).localeCompare(whenDue(b)))
 
   const save = (patch: Partial<Application>) => update.mutate({ id: app.id, ...patch })
   // Text boxes: save on leaving the box, only if something changed; empty means "not set".
@@ -83,6 +84,15 @@ export default function ApplicationDrawer({
       onClose={onClose}
       escapeEnabled={escapeEnabled && !editing}
     >
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="secondary" icon={Send} onClick={() => setEditing({ type: 'follow', application_id: app.id })}>
+          Set a follow-up
+        </Button>
+        <Button size="sm" variant="secondary" icon={CalendarPlus} onClick={() => setEditing({ type: 'interview', application_id: app.id })}>
+          Add an interview
+        </Button>
+      </div>
+
       <div>
         <Tabs
           variant="pill"
@@ -96,11 +106,30 @@ export default function ApplicationDrawer({
             Closed: {app.close_reason ? CLOSE_REASON_LABEL[app.close_reason] : 'no reason recorded'}
           </p>
         )}
-        {/* The prototype links "Set a follow-up" here; follow-ups arrive with Schedule (Phase 3). */}
         {stale && (
-          <p className="mx-0.5 mt-2.5 text-[13px] font-medium text-gold-800">No reply in {sinceDays} days. Follow up or close it.</p>
+          <p className="mx-0.5 mt-2.5 text-[13px] font-medium text-gold-800">
+            No reply in {sinceDays} days.{' '}
+            <button
+              type="button"
+              onClick={() => setEditing({ type: 'follow', application_id: app.id })}
+              className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+            >
+              Set a follow-up
+            </button>{' '}
+            or close it.
+          </p>
         )}
       </div>
+
+      {/* This job's upcoming reminders (prototype JobDrawer's RemChips). */}
+      {upcoming.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          {upcoming.slice(0, 3).map((r) => (
+            <RemChip key={r.id} r={r} onClick={() => setEditing(r)} />
+          ))}
+          {upcoming.length > 3 && <span className="text-xs text-ink-500">+{upcoming.length - 3} more in Schedule</span>}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-x-[18px] gap-y-3.5">
         <Select
@@ -185,28 +214,6 @@ export default function ApplicationDrawer({
       </div>
       {update.error && <p className="text-sm text-coral-700">{update.error.message}</p>}
 
-      {/* Interviews stay here until they fold into Schedule reminders (Phase 3). */}
-      <div>
-        <SectionTitle
-          right={
-            <button onClick={() => setEditing('new')} className="text-[13px] font-semibold text-blue-600 hover:text-blue-700 hover:underline">
-              + Add interview
-            </button>
-          }
-        >
-          Interviews
-        </SectionTitle>
-        {upcoming.length ? (
-          <div className="flex flex-col gap-2">
-            {upcoming.map((i) => (
-              <InterviewRow key={i.id} interview={i} showCompany={false} onClick={() => setEditing(i)} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-[13px] text-ink-500">Nothing scheduled.</p>
-        )}
-      </div>
-
       <ApplicationContacts app={app} />
       <History applicationId={app.id} />
 
@@ -226,9 +233,7 @@ export default function ApplicationDrawer({
         </button>
       </div>
 
-      {editing && (
-        <InterviewDialog interview={editing === 'new' ? undefined : editing} applicationId={app.id} onClose={() => setEditing(null)} />
-      )}
+      {editing && <ScheduleDialog init={editing} onClose={() => setEditing(null)} />}
     </Drawer>
   )
 }

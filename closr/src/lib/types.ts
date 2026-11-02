@@ -133,22 +133,53 @@ export const OUTCOME_LABEL: Record<InterviewOutcome, string> = {
   cancelled: 'Cancelled',
 }
 
-export interface Interview {
+// Reminders (roadmap 3.1, prototype REM_TYPES). Interviews are reminders of type 'interview'.
+export const REMINDER_TYPES = ['follow', 'interview', 'deadline', 'custom'] as const
+export type ReminderType = (typeof REMINDER_TYPES)[number]
+
+export const REMINDER_LABEL: Record<ReminderType, string> = {
+  follow: 'Follow up',
+  interview: 'Interview',
+  deadline: 'Deadline',
+  custom: 'Reminder',
+}
+
+export interface Reminder {
   id: string
-  application_id: string
   user_id: string
-  round_name: string
-  scheduled_at: string
-  format: InterviewFormat | null
-  interviewer: string | null
+  application_id: string | null
+  type: ReminderType
+  title: string
+  due_at: string
+  // When set, the reminder is due then instead of due_at.
+  snoozed_until: string | null
   notes: string | null
-  outcome: InterviewOutcome
+  done: boolean
+  done_at: string | null
+  // Interview reminders only.
+  interview_format: InterviewFormat | null
+  interview_location: string | null
+  interviewer: string | null
+  interview_outcome: InterviewOutcome | null
   created_at: string
   updated_at: string
 }
 
-export type NewInterview = Pick<Interview, 'application_id' | 'round_name' | 'scheduled_at'> &
-  Partial<Pick<Interview, 'format' | 'interviewer' | 'notes' | 'outcome'>>
+export type ReminderFields = Pick<Reminder, 'type' | 'title' | 'due_at'> &
+  Partial<
+    Pick<
+      Reminder,
+      | 'application_id'
+      | 'snoozed_until'
+      | 'notes'
+      | 'done'
+      | 'done_at'
+      | 'interview_format'
+      | 'interview_location'
+      | 'interviewer'
+      | 'interview_outcome'
+    >
+  >
 
 export interface Contact {
   id: string
@@ -195,6 +226,8 @@ export interface Profile {
   ideal_start: IdealStart | null
   // null until onboarding is finished or skipped.
   onboarded_at: string | null
+  // Offer a follow-up 7 days out when a job is marked Applied.
+  suggest_follow_ups: boolean
   created_at: string
   updated_at: string
 }

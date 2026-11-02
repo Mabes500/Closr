@@ -1,9 +1,10 @@
 import { useState, type DragEvent } from 'react'
-import { Briefcase, FileSpreadsheet, Link as LinkIcon, Plus, Search, Upload } from 'lucide-react'
+import { Briefcase, FileSpreadsheet, Link as LinkIcon, Plus, Search, Send, Upload } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useApplications, useMoveApplication, useUpdateApplication } from '../lib/applications'
 import { isStale, nextInterviews } from '../lib/board'
-import { useInterviews } from '../lib/interviews'
+import { plusDays, useReminders } from '../lib/reminders'
+import { useProfile } from '../lib/profile'
 import { STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
 import AddJobModal from '../components/AddJobModal'
 import ApplicationDrawer from '../components/ApplicationDrawer'
@@ -12,7 +13,8 @@ import JobCard from '../components/JobCard'
 import JobListView from '../components/JobListView'
 import { Mark } from '../components/Logo'
 import ReasonModal from '../components/ReasonModal'
-import { Button, Card, EmptyState, FilterChip, Input, Tabs, TopBar } from '../components/ui'
+import ScheduleDialog, { type ScheduleInit } from '../components/ScheduleDialog'
+import { Button, Card, EmptyState, FilterChip, Input, Tabs, Toast, TopBar } from '../components/ui'
 
 type Layout = 'board' | 'list'
 type Filter = 'all' | 'remote' | 'hybrid' | 'onsite' | 'visa' | 'stale'
@@ -53,7 +55,7 @@ const matches = (a: Application, f: Filter) =>
 export default function Board() {
   const navigate = useNavigate()
   const { data: apps = [], isLoading, error } = useApplications()
-  const { data: interviews = [] } = useInterviews()
+  const { data: reminders = [] } = useReminders()
   const move = useMoveApplication()
   const update = useUpdateApplication()
   const [layout, setLayoutState] = useState<Layout>(loadLayout)
@@ -66,8 +68,18 @@ export default function Board() {
   const [openId, setOpenId] = useState<string | null>(null)
   const [closing, setClosing] = useState<Application | null>(null)
   const [asking, setAsking] = useState<Application | null>(null)
+  const [offer, setOffer] = useState<Pick<Application, 'id' | 'company'> | null>(null)
+  const [scheduling, setScheduling] = useState<ScheduleInit | null>(null)
+  const { data: profile } = useProfile()
   const openApp = apps.find((a) => a.id === openId)
-  const next = nextInterviews(interviews)
+  const next = nextInterviews(reminders)
+
+  // Marked Applied → offer a follow-up a week out, unless turned off in Profile or one exists.
+  const offerFollowUp = (app: Pick<Application, 'id' | 'company'>) => {
+    if (profile?.suggest_follow_ups === false) return
+    if (reminders.some((r) => r.application_id === app.id && r.type === 'follow' && !r.done)) return
+    setOffer(app)
+  }
 
   const setLayout = (l: Layout) => {
     setLayoutState(l)
@@ -78,14 +90,17 @@ export default function Board() {
     }
   }
 
+  // The one path for stage changes (drag, card/list chip, drawer tabs).
   // Moving to Closed asks for a reason first; cancelling leaves the card where it was.
   // Moving to Interviewing asks what got you the interview (skippable), once per job.
+  // Moving to Applied offers a follow-up reminder.
   const changeStatus = (id: string, status: ApplicationStatus) => {
     const app = apps.find((a) => a.id === id)
     if (!app || app.status === status) return
     if (status === 'closed') return setClosing(app)
     move(id, status)
     if (status === 'interviewing' && !app.interview_origin) setAsking(app)
+    if (status === 'applied') offerFollowUp(app)
   }
 
   const onDrop = (status: ApplicationStatus) => (e: DragEvent) => {
@@ -254,6 +269,7 @@ export default function Board() {
             // Drop onboarding's { add: 'link' } so a reload doesn't reopen the modal.
             if (location.state) navigate(location.pathname, { replace: true, state: null })
           }}
+          onAdded={(app) => app.status === 'applied' && offerFollowUp(app)}
         />
       )}
       {openApp && (
@@ -261,9 +277,25 @@ export default function Board() {
           app={openApp}
           onClose={() => setOpenId(null)}
           onChangeStatus={changeStatus}
-          escapeEnabled={!closing && !asking}
+          escapeEnabled={!closing && !asking && !scheduling}
         />
       )}
+      {offer && (
+        <Toast
+          icon={Send}
+          title={`${offer.company} moved to Applied.`}
+          message={`Set a follow-up for ${plusDays(7).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}?`}
+          action={{
+            label: 'Set follow-up',
+            onClick: () => {
+              setScheduling({ type: 'follow', application_id: offer.id, due_at: plusDays(7).toISOString() })
+              setOffer(null)
+            },
+          }}
+          onClose={() => setOffer(null)}
+        />
+      )}
+      {scheduling && <ScheduleDialog init={scheduling} onClose={() => setScheduling(null)} />}
       {asking && (
         <ChannelModal
           app={asking}

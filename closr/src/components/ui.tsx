@@ -1,4 +1,4 @@
-import { useEffect, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
+import { useEffect, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { ChevronDown, Plus, X, type LucideIcon } from 'lucide-react'
 
 // App building blocks matching docs/prototype.html's design system
@@ -145,12 +145,33 @@ export function Select({ id, label, options, selectSize = 'md', wrapClassName = 
   )
 }
 
-export function Switch({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
+// `ariaLabel` names the switch when its visible text sits elsewhere (label="").
+export function Switch({
+  id,
+  label,
+  ariaLabel,
+  checked,
+  onChange,
+}: {
+  id: string
+  label: string
+  ariaLabel?: string
+  checked: boolean
+  onChange: (v: boolean) => void
+}) {
   return (
     <label htmlFor={id} className="inline-flex cursor-pointer select-none items-center gap-2.5 text-[15px] font-medium leading-[1.3] text-ink">
-      <input id={id} type="checkbox" role="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
+      <input
+        id={id}
+        type="checkbox"
+        role="switch"
+        aria-label={ariaLabel}
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer sr-only"
+      />
       <span className="relative h-6 w-10 shrink-0 rounded-full bg-paper-300 transition-colors after:absolute after:left-[3px] after:top-[3px] after:size-[18px] after:rounded-full after:bg-white after:shadow-[0_1px_3px_rgb(0_33_71/0.25)] after:transition-transform peer-checked:bg-blue-600 peer-checked:after:translate-x-4 peer-focus-visible:shadow-[0_0_0_3px_var(--color-focus)]" />
-      <span>{label}</span>
+      {label && <span>{label}</span>}
     </label>
   )
 }
@@ -282,6 +303,53 @@ export function Drawer({
         </div>
         <div className="flex flex-1 flex-col gap-[22px] overflow-y-auto px-6 pb-7 pt-5">{children}</div>
       </aside>
+    </div>
+  )
+}
+
+// Bottom-of-screen message with an optional action (prototype `Toast`). Hides itself
+// after `ms` unless the pointer is over it.
+export function Toast({
+  icon: Icon,
+  title,
+  message,
+  action,
+  onClose,
+  ms = 9000,
+}: {
+  icon?: LucideIcon
+  title: string
+  message?: ReactNode
+  action?: { label: string; onClick: () => void }
+  onClose: () => void
+  ms?: number
+}) {
+  const [hover, setHover] = useState(false)
+  useEffect(() => {
+    if (hover) return
+    const t = setTimeout(onClose, ms)
+    return () => clearTimeout(t)
+  }, [hover, ms, onClose])
+  return (
+    <div
+      role="status"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-4 right-4 z-[300] flex items-start gap-3 rounded-2xl bg-oxford-900 px-4 py-3.5 text-white shadow-dialog min-[861px]:left-[calc(248px+32px)] min-[861px]:right-auto min-[861px]:w-[380px]"
+    >
+      {Icon && <Icon size={20} className="mt-px shrink-0 text-gold-400" />}
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <strong className="text-sm font-bold leading-[1.35]">{title}</strong>
+        {message && <span className="text-[13px] leading-[1.45] text-white/80">{message}</span>}
+      </div>
+      {action && (
+        <button type="button" onClick={action.onClick} className="shrink-0 text-[13px] font-bold leading-[1.35] underline underline-offset-[3px]">
+          {action.label}
+        </button>
+      )}
+      <button type="button" aria-label="Dismiss" onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100">
+        <X size={16} />
+      </button>
     </div>
   )
 }

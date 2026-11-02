@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Calendar, Clock } from 'lucide-react'
 import { isStale, jobDays, relDay } from '../lib/board'
 import { ago, formatSalary } from '../lib/format'
-import type { InterviewWithApp } from '../lib/interviews'
+import { whenDue, type ReminderWithApp } from '../lib/reminders'
 import { CLOSE_REASON_LABEL, VISA_LABEL, WORK_MODE_LABEL, type Application, type ApplicationStatus } from '../lib/types'
 import StageSelect from './StageSelect'
 import { Badge, CompanyTile } from './ui'
@@ -35,7 +35,7 @@ export default function JobCard({
   onChangeStatus,
 }: {
   app: Application
-  nextInterview?: InterviewWithApp
+  nextInterview?: ReminderWithApp
   onOpen: () => void
   // The board's changeStatus, the same path as drag-and-drop.
   onChangeStatus: (id: string, status: ApplicationStatus) => void
@@ -85,8 +85,8 @@ export default function JobCard({
       {nextInterview && (
         <div className="flex items-center gap-1.5 rounded-lg bg-gold-100 px-2 py-1.5 text-xs font-medium leading-[1.2] text-gold-800">
           <Calendar size={13} className="shrink-0" />
-          <span className="min-w-0 flex-1 truncate">{nextInterview.round_name}</span>
-          <span className="font-mono">{relDay(nextInterview.scheduled_at)}</span>
+          <span className="min-w-0 flex-1 truncate">{nextInterview.title}</span>
+          <span className="font-mono">{relDay(whenDue(nextInterview))}</span>
         </div>
       )}
       <div className="flex items-center gap-2 text-xs leading-none text-ink-500">

@@ -1,7 +1,7 @@
 import { Calendar } from 'lucide-react'
 import { fmtTime, isStale, jobDays, relDay } from '../lib/board'
 import { ago, formatSalary } from '../lib/format'
-import type { InterviewWithApp } from '../lib/interviews'
+import { whenDue, type ReminderWithApp } from '../lib/reminders'
 import { STATUSES, type Application, type ApplicationStatus } from '../lib/types'
 import StageSelect from './StageSelect'
 import { Card, CompanyTile } from './ui'
@@ -18,7 +18,7 @@ export default function JobListView({
   onChangeStatus,
 }: {
   apps: Application[]
-  next: Map<string, InterviewWithApp>
+  next: Map<string, ReminderWithApp>
   onOpen: (id: string) => void
   // The board's changeStatus, the same path as drag-and-drop.
   onChangeStatus: (id: string, status: ApplicationStatus) => void
@@ -75,7 +75,7 @@ export default function JobListView({
                     {r ? (
                       <span className="inline-flex items-center gap-1.5">
                         <Calendar size={14} />
-                        {relDay(r.scheduled_at)}, {fmtTime(r.scheduled_at)}
+                        {relDay(whenDue(r))}, {fmtTime(whenDue(r))}
                       </span>
                     ) : (
                       <span className="text-ink-400">Nothing scheduled</span>

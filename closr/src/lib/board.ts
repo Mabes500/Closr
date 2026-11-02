@@ -1,5 +1,5 @@
 import { daysAgo } from './format'
-import type { InterviewWithApp } from './interviews'
+import { whenDue, type ReminderWithApp } from './reminders'
 import type { Application, ApplicationStatus } from './types'
 
 // Badge colours per stage (prototype --stage-*-fg/bg/dot).
@@ -19,16 +19,15 @@ export const jobDays = (a: Application) => daysAgo(a.applied_at ?? a.created_at)
 // Applied, and no movement for two weeks (prototype `isStale`).
 export const isStale = (a: Application) => a.status === 'applied' && jobDays(a) >= STALE_DAYS
 
-// The soonest interview from today on that's still pending, per application.
-// Stands in for the prototype's "next reminder" until reminders arrive (Phase 3).
-export function nextInterviews(interviews: InterviewWithApp[], now = new Date()) {
+// The soonest open interview from today on, per application.
+export function nextInterviews(reminders: ReminderWithApp[], now = new Date()) {
   const today = new Date(now)
   today.setHours(0, 0, 0, 0)
-  const next = new Map<string, InterviewWithApp>()
-  for (const i of interviews) {
-    if (i.outcome !== 'pending' || new Date(i.scheduled_at) < today) continue
-    const cur = next.get(i.application_id)
-    if (!cur || i.scheduled_at < cur.scheduled_at) next.set(i.application_id, i)
+  const next = new Map<string, ReminderWithApp>()
+  for (const r of reminders) {
+    if (r.type !== 'interview' || r.done || !r.application_id || new Date(whenDue(r)) < today) continue
+    const cur = next.get(r.application_id)
+    if (!cur || whenDue(r) < whenDue(cur)) next.set(r.application_id, r)
   }
   return next
 }
