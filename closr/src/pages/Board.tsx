@@ -206,7 +206,7 @@ export default function Board() {
               </EmptyState>
             </Card>
           ) : layout === 'list' ? (
-            <JobListView apps={list} next={next} onOpen={setOpenId} />
+            <JobListView apps={list} next={next} onOpen={setOpenId} onChangeStatus={changeStatus} />
           ) : (
             <div className="grid flex-1 auto-cols-[minmax(250px,1fr)] grid-flow-col items-start gap-3 overflow-x-auto pb-2">
               {STATUSES.map((s) => {
@@ -226,7 +226,13 @@ export default function Board() {
                   >
                     <ColumnHeader status={s} count={cards.length} />
                     {cards.map((a) => (
-                      <JobCard key={a.id} app={a} nextInterview={next.get(a.id)} onOpen={() => setOpenId(a.id)} />
+                      <JobCard
+                        key={a.id}
+                        app={a}
+                        nextInterview={next.get(a.id)}
+                        onOpen={() => setOpenId(a.id)}
+                        onChangeStatus={changeStatus}
+                      />
                     ))}
                     {!cards.length && (
                       <div className="rounded-xl border-[1.5px] border-dashed border-paper-400 px-2 py-3.5 text-center text-[13px] text-ink-500">

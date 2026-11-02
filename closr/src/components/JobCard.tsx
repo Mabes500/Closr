@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Calendar, Clock } from 'lucide-react'
 import { isStale, jobDays, relDay } from '../lib/board'
 import { ago, formatSalary } from '../lib/format'
 import type { InterviewWithApp } from '../lib/interviews'
-import { CLOSE_REASON_LABEL, VISA_LABEL, WORK_MODE_LABEL, type Application } from '../lib/types'
+import { CLOSE_REASON_LABEL, VISA_LABEL, WORK_MODE_LABEL, type Application, type ApplicationStatus } from '../lib/types'
+import StageSelect from './StageSelect'
 import { Badge, CompanyTile } from './ui'
 
 // Mode, visa and (for remote jobs) time zone tags (prototype `JobTags` + `VisaBadge`).
@@ -30,11 +32,16 @@ export default function JobCard({
   app,
   nextInterview,
   onOpen,
+  onChangeStatus,
 }: {
   app: Application
   nextInterview?: InterviewWithApp
   onOpen: () => void
+  // The board's changeStatus, the same path as drag-and-drop.
+  onChangeStatus: (id: string, status: ApplicationStatus) => void
 }) {
+  // While the stage menu is open the card isn't draggable, so picking can't start a drag.
+  const [picking, setPicking] = useState(false)
   const closed = app.status === 'closed'
   const days = jobDays(app)
   const foot =
@@ -51,7 +58,7 @@ export default function JobCard({
 
   return (
     <div
-      draggable
+      draggable={!picking}
       onDragStart={(e) => e.dataTransfer.setData('text/plain', app.id)}
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
@@ -68,7 +75,13 @@ export default function JobCard({
           <span className="text-[13px] leading-[1.3] text-ink-500">{where}</span>
         </div>
       </div>
-      <JobTags app={app} />
+      {/* Stage menu at the end of the tags row, so the title keeps the card's full width. */}
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <JobTags app={app} />
+        </div>
+        <StageSelect app={app} onChange={onChangeStatus} onPicking={setPicking} />
+      </div>
       {nextInterview && (
         <div className="flex items-center gap-1.5 rounded-lg bg-gold-100 px-2 py-1.5 text-xs font-medium leading-[1.2] text-gold-800">
           <Calendar size={13} className="shrink-0" />

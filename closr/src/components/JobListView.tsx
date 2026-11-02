@@ -1,9 +1,10 @@
 import { Calendar } from 'lucide-react'
-import { STAGE_BADGE, fmtTime, isStale, jobDays, relDay } from '../lib/board'
+import { fmtTime, isStale, jobDays, relDay } from '../lib/board'
 import { ago, formatSalary } from '../lib/format'
 import type { InterviewWithApp } from '../lib/interviews'
-import { STATUSES, STATUS_LABEL, type Application } from '../lib/types'
-import { Badge, Card, CompanyTile } from './ui'
+import { STATUSES, type Application, type ApplicationStatus } from '../lib/types'
+import StageSelect from './StageSelect'
+import { Card, CompanyTile } from './ui'
 
 const th = 'whitespace-nowrap border-b border-paper-200 bg-paper-50 px-3.5 py-2.5 text-left text-xs font-semibold text-ink-500'
 const td = 'px-3.5 py-2.5 group-hover:bg-paper-100 group-focus-visible:bg-paper-100'
@@ -14,10 +15,13 @@ export default function JobListView({
   apps,
   next,
   onOpen,
+  onChangeStatus,
 }: {
   apps: Application[]
   next: Map<string, InterviewWithApp>
   onOpen: (id: string) => void
+  // The board's changeStatus, the same path as drag-and-drop.
+  onChangeStatus: (id: string, status: ApplicationStatus) => void
 }) {
   const order = (a: Application) => STATUSES.indexOf(a.status)
   const closedAt = STATUSES.indexOf('closed')
@@ -60,9 +64,7 @@ export default function JobListView({
                     </div>
                   </td>
                   <td className={td}>
-                    <Badge className={STAGE_BADGE[a.status].badge} dot={STAGE_BADGE[a.status].dot}>
-                      {STATUS_LABEL[a.status]}
-                    </Badge>
+                    <StageSelect app={a} onChange={onChangeStatus} />
                   </td>
                   <td className={`${td} text-ink-700`}>{a.location ?? '—'}</td>
                   <td className={`${td} whitespace-nowrap font-mono text-[13px] text-ink`}>{formatSalary(a)}</td>
