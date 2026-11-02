@@ -45,7 +45,7 @@ Do these first; everything later depends on them.
 - [x] **1.3 Profile screen.** Edit everything from onboarding plus location, salary floor, ideal start. Autosave. "Redo onboarding".
 
 ## Phase 2: Getting jobs in
-- [ ] **2.1 Paste a job link.** Server function (Supabase Edge Function) fetches the posting and pre-fills title, company, location, work mode, salary where available. User reviews before saving. Quick add stays: only title and company required.
+- [x] **2.1 Paste a job link.** Server function (Vercel serverless function `api/parse-job.ts`, signed-in users only) fetches the posting and pre-fills title, company, location, work mode, salary where available. User reviews before saving. Quick add stays: only title and company required.
 - [ ] **2.2 Spreadsheet import.** Upload CSV or XLSX, auto-match columns to Closr fields with manual override, map the user's status words to stages, preview, import, undo import.
 
 ## Phase 3: Schedule and reminders
