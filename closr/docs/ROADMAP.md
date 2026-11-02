@@ -63,8 +63,13 @@ Do these first; everything later depends on them.
 - [x] **5.3 "People like you".** Where offers came from for similar users. Built with real data only: a database function (`people_like_you`) returns anonymous totals for users sharing a target role, only when at least 20 of them exist (sources used by fewer than 5 fold into "Other"); otherwise Goals says "This fills in as more people in your field use Closr." No sample data is shown.
 
 ## Phase 6: Jobs feed
-- [ ] **6.1 Plan first** (separate session): which sources can be used legally (ATS public APIs such as Greenhouse, Lever, Ashby; company career pages), matching on roles, location, visa, time zone, salary floor; daily refresh. Role matching should use the role catalogue in `src/data/roles.ts`: match postings on the catalogue titles and their aliases (e.g. a "SWE" posting matches a user who chose "Software engineer"), and fall back to plain text for roles users typed that aren't in the catalogue.
-- [ ] **6.2 Build.** Today's matches with reasons, save to board, "Not for me", posting page.
+The plan is in [docs/JOBS-FEED-PLAN.md](JOBS-FEED-PLAN.md): sources and what's excluded, the board registry, the daily pipeline, matching, and the app. Build in this order, one task each.
+
+- [x] **6.1 Plan.** Done: docs/JOBS-FEED-PLAN.md. Role matching should use the role catalogue in `src/data/roles.ts`: match postings on the catalogue titles and their aliases (e.g. a "SWE" posting matches a user who chose "Software engineer"), and fall back to plain text for roles users typed that aren't in the catalogue.
+- [x] **6.2a Data pipeline.** `job_boards` and `job_postings` tables with RLS; fetchers for Greenhouse, Lever and Ashby; normaliser; daily GitHub Actions workflow (`.github/workflows/jobs-feed.yml`, `scripts/jobs/`); starter list loader (`scripts/jobs/seed-boards.csv`); flywheel registration from paste-link and import. Also the plan's section 7: LinkedIn links are no longer fetched.
+- [ ] **6.2b Enrichment.** Rules plus a Claude Haiku pass for new postings (role category and catalogue title, seniority, visa, region and time zone limits, remote eligibility), with a per-run cost cap and a dry-run mode.
+- [ ] **6.2c Matching.** Profile fields (needs visa sponsorship, countries I can work in), scoring, `job_matches`, reasons.
+- [ ] **6.2d Jobs UI.** Jobs screen (today's matches, filters, empty states), posting page, save to board, "Not for me", closed state, bell notification.
 
 ## Phase 7: Settings and launch
 - [ ] **7.1 Settings.** Name and email change, password change, Google connect/disconnect, appearance (light default, dark, match device), sessions and sign out other devices, export data (CSV), delete account. Includes the dark-mode toggle in Sidebar (deferred from 0.4).
