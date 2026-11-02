@@ -18,6 +18,7 @@ import {
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { useApplications } from '../lib/applications'
+import { useProfile } from '../lib/profile'
 import { supabase } from '../lib/supabase'
 import { Checkbox } from './auth/fields'
 import { Logo } from './Logo'
@@ -95,11 +96,12 @@ function Sidebar({ onClose, onSignOut }: { onClose?: () => void; onSignOut: () =
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { data: apps = [] } = useApplications()
+  const { data: profile } = useProfile()
   const [menu, setMenu] = useState(false)
 
   const meta = session?.user.user_metadata ?? {}
   const email = session?.user.email ?? ''
-  const name: string = meta.full_name || meta.name || email.split('@')[0] || 'You'
+  const name: string = profile?.full_name || meta.full_name || meta.name || email.split('@')[0] || 'You'
   const current = NAV_PARENT[pathname] ?? pathname
   const counts: Record<string, number> = { '/': apps.filter((a) => a.status !== 'closed').length }
   const inAccount = pathname === '/profile' || pathname === '/settings'
@@ -152,8 +154,7 @@ function Sidebar({ onClose, onSignOut }: { onClose?: () => void; onSignOut: () =
           <Avatar name={name} />
           <div className="flex min-w-0 flex-1 flex-col gap-[3px] text-left">
             <span className="truncate text-[13px] font-semibold leading-[1.1] text-ink">{name}</span>
-            {/* The prototype shows the first target role here; that arrives with Profile (1.1). */}
-            <span className="truncate text-xs leading-[1.1] text-ink-500">Your profile</span>
+            <span className="truncate text-xs leading-[1.1] text-ink-500">{profile?.target_roles[0] || 'Your profile'}</span>
           </div>
           <ChevronsUpDown size={15} className="text-ink-400" />
         </button>

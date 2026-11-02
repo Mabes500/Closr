@@ -1,0 +1,300 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Check, Loader, MapPin, Plus, RotateCcw, Wallet } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../auth/AuthProvider'
+import { Avatar, Button, Input, RoleChip, Select, ToggleChip } from '../components/ui'
+import { PACES, PACE_OPTIONS, STAGE_OPTIONS, cleanRole } from '../lib/onboarding'
+import { useProfile, useUpdateProfile } from '../lib/profile'
+import { PACE_TARGET, WORK_MODE_LABEL, type IdealStart, type Profile as ProfileRow, type WorkMode } from '../lib/types'
+import type { OnboardingState } from './Onboarding'
+
+const START_OPTIONS = [
+  { value: '', label: 'Not set' },
+  { value: 'asap', label: 'As soon as possible' },
+  { value: 'months', label: 'In the next couple months' },
+  { value: 'right_fit', label: 'Whenever the right fit comes' },
+]
+// The prototype's list for the salary floor.
+const FLOOR_CURRENCIES = ['EUR', 'USD', 'GBP', 'CAD', 'AUD'].map((c) => ({ value: c, label: c }))
+const SETUPS: WorkMode[] = ['remote', 'hybrid', 'onsite']
+
+const cardShape = 'flex flex-col rounded-2xl p-6 shadow-card'
+const card = `${cardShape} border border-paper-200 bg-white`
+const h2 = 'text-lg font-semibold leading-[1.3] tracking-[-0.02em] text-ink'
+const sub = 'text-sm leading-[1.45] text-ink-500'
+
+// Prototype `ProfileScreen`. Everything autosaves: buttons and menus at once, text a moment
+// after you stop typing. Left out until their features exist: reminder toggles (Phase 3 /
+// 7.2), email change, data export and account deletion (7.1).
+export default function Profile() {
+  const { session } = useAuth()
+  const { data: profile, isLoading } = useProfile()
+  const update = useUpdateProfile()
+  const navigate = useNavigate()
+  const [roleDraft, setRoleDraft] = useState('')
+  const [touched, setTouched] = useState(false)
+
+  if (isLoading) return null
+  if (!profile) return <p className="text-sm text-coral-700">Your profile couldn't be loaded. Try reloading the page.</p>
+
+  const save = (patch: Partial<ProfileRow>) => {
+    setTouched(true)
+    update.mutate(patch)
+  }
+  const status = update.isPending ? 'saving' : update.isError ? 'error' : touched ? 'saved' : 'idle'
+
+  function addRole() {
+    const t = cleanRole(roleDraft)
+    setRoleDraft('')
+    if (!t || profile!.target_roles.some((r) => r.toLowerCase() === t.toLowerCase())) return
+    save({ target_roles: [...profile!.target_roles, t] })
+  }
+
+  const stage = STAGE_OPTIONS.find((o) => o.id === profile.search_stage)
+  const pace = PACES[profile.weekly_pace]
+  const since = new Date(profile.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
+  const meta = session?.user.user_metadata ?? {}
+  const displayName = profile.full_name || meta.full_name || meta.name || ''
+
+  return (
+    <div className="flex max-w-[1040px] flex-col gap-7">
+      <header className="flex flex-wrap items-center gap-5">
+        <Avatar name={displayName || session?.user.email || '?'} size={72} tone="brand" />
+        <div className="flex min-w-[220px] flex-1 flex-col gap-1.5">
+          <h1 className="text-[30px] font-bold leading-[1.1] tracking-[-0.03em] text-ink">{displayName || 'Your profile'}</h1>
+          <div className="flex flex-wrap items-center gap-2.5 text-[15px] leading-[1.4] text-ink-500">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-[5px] text-xs font-semibold leading-none text-blue-700">
+              <span className="size-1.5 rounded-full bg-blue-600" />
+              {stage ? stage.label : 'Search stage not set'}
+            </span>
+            <span>
+              Searching since <span className="font-mono text-[13px] text-ink-700">{since}</span>
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 font-mono text-xs font-medium leading-none text-ink-500" aria-live="polite">
+          {status === 'saving' ? (
+            <Loader size={15} className="animate-spin text-ink-400" />
+          ) : (
+            <Check size={15} className={status === 'saved' ? 'text-mint-600' : 'text-ink-400'} />
+          )}
+          {status === 'saving'
+            ? 'Saving…'
+            : status === 'saved'
+              ? 'All changes saved'
+              : status === 'error'
+                ? <span className="text-coral-700">Couldn't save — check your connection</span>
+                : 'Changes save automatically'}
+        </div>
+      </header>
+
+      <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))]">
+        <div className="flex flex-col gap-5">
+          <section className={`${card} gap-4`}>
+            <Heading title="Where you are" sub="Searches change. Update this whenever yours does — we'll adjust what we show you." />
+            <div className="grid grid-cols-2 gap-2">
+              {STAGE_OPTIONS.map(({ id, icon: Icon, label }) => {
+                const on = profile.search_stage === id
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => save({ search_stage: id })}
+                    className={`flex items-center gap-2.5 rounded-xl border-[1.5px] p-3 text-left text-sm leading-[1.25] text-ink transition-[border-color,background,transform] active:scale-[.97] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_var(--color-focus)] ${
+                      on ? 'border-blue-600 bg-blue-50 font-semibold' : 'border-paper-200 bg-white font-medium hover:border-ink-300'
+                    }`}
+                  >
+                    <Icon size={17} className={on ? 'text-blue-600' : 'text-ink-500'} />
+                    {id === 'interviewing' ? 'Interviewing' : label}
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+
+          <section className={`${card} gap-[22px]`}>
+            <Heading title="What you're looking for" sub="Used to pick openings on Jobs. Everything here is optional." />
+            <div className="flex flex-col gap-2.5">
+              <div className="text-[13px] font-semibold leading-[1.2] text-ink">Roles</div>
+              {profile.target_roles.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {profile.target_roles.map((r) => (
+                    <RoleChip key={r} label={r} onRemove={() => save({ target_roles: profile.target_roles.filter((x) => x !== r) })} />
+                  ))}
+                </div>
+              )}
+              <Input
+                id="pf-role"
+                inputSize="sm"
+                icon={Plus}
+                placeholder="Add a role and press Enter"
+                value={roleDraft}
+                onChange={(e) => setRoleDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    addRole()
+                  }
+                }}
+              />
+            </div>
+            <div className="flex flex-col gap-2.5">
+              <div className="text-[13px] font-semibold leading-[1.2] text-ink">Work setup</div>
+              <div className="flex flex-wrap gap-2">
+                {SETUPS.map((m) => {
+                  const on = profile.work_setups.includes(m)
+                  return (
+                    <ToggleChip
+                      key={m}
+                      on={on}
+                      onClick={() =>
+                        save({ work_setups: on ? profile.work_setups.filter((x) => x !== m) : SETUPS.filter((x) => x === m || profile.work_setups.includes(x)) })
+                      }
+                    >
+                      {WORK_MODE_LABEL[m]}
+                    </ToggleChip>
+                  )
+                })}
+              </div>
+            </div>
+            <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
+              <AutosaveInput
+                id="pf-loc"
+                label="Locations"
+                icon={MapPin}
+                placeholder="City or region"
+                saved={profile.locations ?? ''}
+                onSave={(v) => save({ locations: v.trim() || null })}
+              />
+              <Select
+                id="pf-start"
+                label="Ideal start"
+                value={profile.ideal_start ?? ''}
+                onChange={(e) => save({ ideal_start: (e.target.value || null) as IdealStart | null })}
+                options={START_OPTIONS}
+              />
+              <AutosaveInput
+                id="pf-sal"
+                label="Salary floor"
+                icon={Wallet}
+                inputMode="numeric"
+                placeholder="e.g. 85,000"
+                hint="Private — only used to filter Jobs"
+                saved={profile.salary_floor == null ? '' : profile.salary_floor.toLocaleString()}
+                onSave={(v) => {
+                  const digits = v.replace(/\D/g, '')
+                  const n = digits ? Number(digits) : null
+                  save({ salary_floor: n, salary_floor_currency: n == null ? profile.salary_floor_currency : profile.salary_floor_currency ?? 'USD' })
+                }}
+              />
+              <Select
+                id="pf-cur"
+                label="Currency"
+                value={profile.salary_floor_currency ?? 'USD'}
+                onChange={(e) => save({ salary_floor_currency: e.target.value })}
+                options={FLOOR_CURRENCIES}
+              />
+            </div>
+          </section>
+        </div>
+
+        <div className="flex flex-col gap-5">
+          {/* Saved now; the weekly target itself is used from Phase 5. */}
+          <section className={`${cardShape} gap-[18px] bg-oxford-900 text-white`}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <h2 className={`${h2} text-white`}>Weekly pace</h2>
+                <p className={`${sub} text-white/70 [text-wrap:pretty]`}>{pace.note}</p>
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-0.5">
+                <span className="font-mono text-[28px] font-medium leading-none text-gold-400">{PACE_TARGET[profile.weekly_pace]}</span>
+                <span className="text-xs font-medium leading-[1.2] text-white/60">a week</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 rounded-[14px] bg-white/[.08] p-1">
+              {PACE_OPTIONS.map(({ id, label }) => {
+                const on = profile.weekly_pace === id
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => save({ weekly_pace: id })}
+                    className={`h-10 rounded-[10px] text-sm font-semibold leading-none transition-[background,transform] active:scale-[.97] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_var(--color-focus)] ${
+                      on ? 'bg-gold-500 text-ink' : 'text-white/80 hover:bg-white/[.06]'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+
+          <section className={`${card} gap-4`}>
+            <h2 className={h2}>Account</h2>
+            <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
+              <AutosaveInput id="pf-name" label="Name" saved={profile.full_name ?? ''} onSave={(v) => save({ full_name: v.trim() || null })} />
+              {/* Changing email needs a confirmation flow; that comes with Settings (7.1). */}
+              <Input id="pf-email" label="Email" type="email" value={session?.user.email ?? ''} readOnly className="text-ink-500" />
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={RotateCcw}
+                onClick={() => navigate('/welcome', { state: { redo: true } satisfies OnboardingState })}
+              >
+                Redo onboarding
+              </Button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Heading({ title, sub: text }: { title: string; sub: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <h2 className={h2}>{title}</h2>
+      <p className={sub}>{text}</p>
+    </div>
+  )
+}
+
+// Text box that saves 600ms after typing stops, on leaving the box, and (if an edit is
+// still waiting) when the page is left.
+function AutosaveInput({
+  saved,
+  onSave,
+  ...rest
+}: Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange' | 'onBlur'> & { saved: string; onSave: (v: string) => void }) {
+  const [value, setValue] = useState(saved)
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const last = useRef(saved)
+  const latest = useRef({ value: saved, onSave })
+  latest.current = { value, onSave }
+  const flush = () => {
+    clearTimeout(timer.current)
+    const { value: v, onSave: save } = latest.current
+    if (v === last.current) return
+    last.current = v
+    save(v)
+  }
+  useEffect(() => flush, [])
+  return (
+    <Input
+      {...rest}
+      value={value}
+      onChange={(e) => {
+        setValue(e.target.value)
+        clearTimeout(timer.current)
+        timer.current = setTimeout(flush, 600)
+      }}
+      onBlur={flush}
+    />
+  )
+}

@@ -7,7 +7,6 @@ import {
   Settings,
   Target,
   Upload,
-  User,
   type LucideIcon,
 } from 'lucide-react'
 import { Card, EmptyState, TopBar } from '../components/ui'
@@ -20,7 +19,6 @@ const SCREENS: Record<string, { title: string; icon: LucideIcon; body: string }>
   schedule: { title: 'Schedule', icon: CalendarClock, body: 'Interviews, follow-ups and deadlines in one list, with reminders.' },
   cv: { title: 'CV versions', icon: FileText, body: 'Label each CV you send and see which one gets replies.' },
   import: { title: 'Import', icon: Upload, body: 'Bring your jobs over from a spreadsheet in a few clicks.' },
-  profile: { title: 'Profile', icon: User, body: 'Your roles, weekly pace, locations and salary floor.' },
   settings: { title: 'Settings', icon: Settings, body: 'Account, password, appearance, notifications and your data.' },
 }
 

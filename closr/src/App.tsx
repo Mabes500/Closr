@@ -13,6 +13,7 @@ import Board from './pages/Board'
 import Interviews from './pages/Interviews'
 import ComingSoon from './pages/ComingSoon'
 import Onboarding from './pages/Onboarding'
+import Profile from './pages/Profile'
 import { useProfile } from './lib/profile'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } })
@@ -89,7 +90,7 @@ export default function App() {
               <Route path="schedule" element={<ComingSoon screen="schedule" />} />
               <Route path="cv" element={<ComingSoon screen="cv" />} />
               <Route path="import" element={<ComingSoon screen="import" />} />
-              <Route path="profile" element={<ComingSoon screen="profile" />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<ComingSoon screen="settings" />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -42,7 +42,7 @@ Do these first; everything later depends on them.
 ## Phase 1: Onboarding and profile
 - [x] **1.1 Profile fields.** Add to profiles: search stage (starting / applying / interviewing / browsing), target roles (list), weekly pace (ease 2 / steady 5 / push 10), work setups, locations, salary floor and currency, ideal start, `onboarded_at`.
 - [x] **1.2 Onboarding flow.** Four steps after first sign-up: where you are, roles (chips with suggestions), weekly pace, how to start (import spreadsheet / paste a job link / empty board). Progress bar, back, skip step, skip all, Enter to continue, "You're all set" screen. New users without `onboarded_at` go here; the final choice routes to Import, Add job, or Board.
-- [ ] **1.3 Profile screen.** Edit everything from onboarding plus location, salary floor, ideal start. Autosave. "Redo onboarding".
+- [x] **1.3 Profile screen.** Edit everything from onboarding plus location, salary floor, ideal start. Autosave. "Redo onboarding".
 
 ## Phase 2: Getting jobs in
 - [ ] **2.1 Paste a job link.** Server function (Supabase Edge Function) fetches the posting and pre-fills title, company, location, work mode, salary where available. User reviews before saving. Quick add stays: only title and company required.
