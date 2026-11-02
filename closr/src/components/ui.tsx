@@ -273,6 +273,49 @@ export function Drawer({
 // ---------------------------------------------------------------------------
 // Display
 // ---------------------------------------------------------------------------
+// Screen heading row (prototype `TopBar`): title, optional subtitle, actions on the right.
+export function TopBar({ title, sub, children }: { title: string; sub?: ReactNode; children?: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3.5">
+      <h1 className="text-[30px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink">{title}</h1>
+      {sub && <span className="text-sm leading-[1.4] text-ink-500">{sub}</span>}
+      <span className="flex-1" />
+      {children}
+    </div>
+  )
+}
+
+export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`rounded-2xl border border-paper-200 bg-white ${className}`}>{children}</div>
+}
+
+const EMPTY_TONES = { blue: 'bg-blue-100 text-blue-600', paper: 'bg-paper-200 text-ink-500' }
+
+export function EmptyState({
+  icon: Icon,
+  title,
+  body,
+  tone = 'blue',
+  children,
+}: {
+  icon: LucideIcon
+  title: string
+  body?: ReactNode
+  tone?: keyof typeof EMPTY_TONES
+  children?: ReactNode
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3 px-5 py-9 text-center">
+      <div className={`flex size-14 items-center justify-center rounded-2xl ${EMPTY_TONES[tone]}`}>
+        <Icon size={28} />
+      </div>
+      <b className="text-xl font-semibold leading-[1.25] tracking-[-0.02em] text-ink [text-wrap:balance]">{title}</b>
+      {body && <p className="max-w-[420px] text-sm leading-normal text-ink-500">{body}</p>}
+      {children && <div className="mt-1.5 flex flex-wrap justify-center gap-2">{children}</div>}
+    </div>
+  )
+}
+
 export function SectionTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
     <div className="mb-2 flex items-center gap-2">

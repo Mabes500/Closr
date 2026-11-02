@@ -6,6 +6,7 @@ import StatsStrip from '../components/StatsStrip'
 import ApplicationDrawer from '../components/ApplicationDrawer'
 import ChannelModal from '../components/ChannelModal'
 import ReasonModal from '../components/ReasonModal'
+import { Button, TopBar } from '../components/ui'
 
 export default function Board() {
   const { data: apps = [], isLoading, error } = useApplications()
@@ -37,20 +38,11 @@ export default function Board() {
   const active = apps.filter((a) => a.status !== 'saved' && a.status !== 'closed').length
 
   return (
-    <div className="px-6 py-6">
-      <div className="mb-6 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Your board</h1>
-          <p className="mt-1 text-sm text-ink-muted">
-            {apps.length} applications · {active} in play
-          </p>
-        </div>
-        <button
-          onClick={() => setAdding('applied')}
-          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover"
-        >
-          + Add a job
-        </button>
+    <div className="min-w-0">
+      <div className="mb-6">
+        <TopBar title="Board" sub={`${apps.length} jobs · ${active} in play`}>
+          <Button onClick={() => setAdding('applied')}>+ Add a job</Button>
+        </TopBar>
       </div>
 
       {error && <p className="text-sm text-status-rejected">{error.message}</p>}

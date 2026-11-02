@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import InterviewDialog from '../components/InterviewDialog'
+import { Button, TopBar } from '../components/ui'
 import InterviewRow from '../components/InterviewRow'
 import { groupInterviews, useInterviews, type InterviewWithApp } from '../lib/interviews'
 import type { Interview } from '../lib/types'
@@ -10,20 +13,19 @@ export default function Interviews() {
   const { next7, later, past } = groupInterviews(interviews)
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-6">
-      <div className="mb-6 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Interviews</h1>
-          <p className="mt-1 text-sm text-ink-muted">
-            {next7.length} in the next 7 days · {next7.length + later.length} upcoming
-          </p>
-        </div>
-        <button
-          onClick={() => setEditing('new')}
-          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover"
-        >
-          + Add interview
-        </button>
+    <div className="w-full max-w-3xl">
+      {/* Interviews fold into Schedule in Phase 3; until then this page hangs off it. */}
+      <Link
+        to="/schedule"
+        className="-ml-0.5 mb-3 inline-flex items-center gap-1.5 rounded-lg py-1.5 pl-0.5 pr-2 text-sm font-semibold leading-none text-ink-500 hover:bg-paper-100 hover:text-ink"
+      >
+        <ArrowLeft size={16} />
+        Schedule
+      </Link>
+      <div className="mb-6">
+        <TopBar title="Interviews" sub={`${next7.length} in the next 7 days · ${next7.length + later.length} upcoming`}>
+          <Button onClick={() => setEditing('new')}>+ Add interview</Button>
+        </TopBar>
       </div>
 
       {error && <p className="text-sm text-status-rejected">{error.message}</p>}

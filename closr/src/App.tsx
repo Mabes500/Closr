@@ -3,7 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
 import { isSupabaseConfigured } from './lib/supabase'
-import Layout from './components/Layout'
+import AppShell from './components/AppShell'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -11,7 +11,7 @@ import { ForgotPassword, ResetSent } from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Board from './pages/Board'
 import Interviews from './pages/Interviews'
-import Contacts from './pages/Contacts'
+import ComingSoon from './pages/ComingSoon'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } })
 
@@ -54,13 +54,21 @@ export default function App() {
             <Route
               element={
                 <RequireAuth>
-                  <Layout />
+                  <AppShell />
                 </RequireAuth>
               }
             >
               <Route index element={<Board />} />
+              {/* Reached from the Schedule placeholder until Schedule is built (Phase 3). */}
               <Route path="interviews" element={<Interviews />} />
-              <Route path="contacts" element={<Contacts />} />
+              <Route path="jobs" element={<ComingSoon screen="jobs" />} />
+              <Route path="goals" element={<ComingSoon screen="goals" />} />
+              <Route path="checkins" element={<ComingSoon screen="checkins" />} />
+              <Route path="schedule" element={<ComingSoon screen="schedule" />} />
+              <Route path="cv" element={<ComingSoon screen="cv" />} />
+              <Route path="import" element={<ComingSoon screen="import" />} />
+              <Route path="profile" element={<ComingSoon screen="profile" />} />
+              <Route path="settings" element={<ComingSoon screen="settings" />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
