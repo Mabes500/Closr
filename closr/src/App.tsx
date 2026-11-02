@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
 import { isSupabaseConfigured } from './lib/supabase'
 import Layout from './components/Layout'
+import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Board from './pages/Board'
 import Interviews from './pages/Interviews'
@@ -12,8 +13,10 @@ const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth()
+  const { pathname } = useLocation()
   if (loading) return null
-  if (!session) return <Navigate to="/login" replace />
+  // Signed-out visitors see the landing page at /, and are sent to sign in from any other app page.
+  if (!session) return pathname === '/' ? <Landing /> : <Navigate to="/login" replace />
   return children
 }
 
