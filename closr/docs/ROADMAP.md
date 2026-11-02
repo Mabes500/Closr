@@ -37,7 +37,7 @@ Do these first; everything later depends on them.
 - [x] **0.2 Stages.** Stages become Saved, Applied, Interviewing, Offer, Closed. Closed requires a reason: Rejected, No response, Withdrew, Declined offer (`ReasonModal`). Migrate existing `rejected` rows to `closed` with reason `rejected`. Closed cards show the reason and are dimmed.
 - [x] **0.3 Job fields.** Add to applications: time zone, visa sponsorship (yes / no / not needed / unknown), salary min and max with currency, source (LinkedIn or X post, Job board, Company career page, Referral, Recruiter reached out, Community, Other), interview origin ("What got you this interview?"), next action. Update add-job and the drawer to match `AddJobModal` and `JobDrawer`.
 - [x] **0.4 App shell.** Sidebar nav from `NAV`: Board, Jobs, Goals, Check-ins, Schedule, CV Versions, Spreadsheet Import; Profile and Settings in the user menu. Mobile layout per prototype. Screens not built yet show a simple "coming soon" placeholder.
-- [ ] **0.5 Reconcile built work.** Contacts move inside the job drawer (no Contacts page in nav; keep the table). The Interviews page folds into Schedule (Phase 3). Keep the stats only where the prototype shows them.
+- [x] **0.5 Reconcile built work.** Contacts move inside the job drawer (no Contacts page in nav; keep the table). The Interviews page folds into Schedule (Phase 3). Keep the stats only where the prototype shows them.
 
 ## Phase 1: Onboarding and profile
 - [ ] **1.1 Profile fields.** Add to profiles: search stage (starting / applying / interviewing / browsing), target roles (list), weekly pace (ease 2 / steady 5 / push 10), work setups, locations, salary floor and currency, ideal start, `onboarded_at`.
@@ -50,16 +50,16 @@ Do these first; everything later depends on them.
 
 ## Phase 3: Schedule and reminders
 - [ ] **3.1 Reminders.** Reminders table with types Follow up, Interview, Deadline, Reminder (`REM_TYPES`), linked to a job, with due time, done, snooze. Existing interviews migrate in.
-- [ ] **3.2 Schedule screen.** Overdue, today, later this week, later; filter by type; mark done; snooze. Next reminder chip on board cards.
-- [ ] **3.3 In-app notifications.** Bell + panel (`NotificationPanel`): interviews, overdue follow-ups, deadlines, check-ins, streaks. Read/unread.
+- [ ] **3.2 Schedule screen.** Overdue, today, later this week, later; filter by type; mark done; snooze. Next reminder chip on board cards. Replaces the old Contacts "Follow up" list; the drawer's "Follow up" badge should link to the reminder.
+- [ ] **3.3 In-app notifications.** Bell + panel (`NotificationPanel`): interviews, overdue follow-ups, deadlines, check-ins, streaks. Read/unread. Includes the notification bell, which the prototype puts in the Sidebar header and the mobile top bar (deferred from 0.4).
 
 ## Phase 4: Check-ins and CV versions
 - [ ] **4.1 CV versions.** Label each CV/résumé version; pick the version when adding or editing a job; show response rate per version.
 - [ ] **4.2 Check-ins.** For applications quiet 7+ days, ask "how is it going": No reply yet / Interview / Rejected. One-tap answers update the stage; "No reply yet" offers a follow-up reminder.
 
 ## Phase 5: Goals
-- [ ] **5.1 Weekly target and streak.** Target from weekly pace; raise/lower; streak of days the user touched their search.
-- [ ] **5.2 Goals screen.** Your plan this week, progress ring, consistency, what's working from the user's own data (sources, CV versions, response rates).
+- [ ] **5.1 Weekly target and streak.** Target from weekly pace; raise/lower; streak of days the user touched their search. Includes the streak card in Sidebar (deferred from 0.4).
+- [ ] **5.2 Goals screen.** Your plan this week, progress ring, consistency, what's working from the user's own data (sources, CV versions, response rates). Reuse `src/lib/stats.ts` from the old board stats strip (removed in 0.5). It counts a reply as reaching Interviewing or Offer; the prototype also counts a rejection as a reply, so decide which before showing response rates.
 - [ ] **5.3 "People like you".** Where offers came from for similar users. Needs enough anonymised aggregate data; ship with the user's own comparison first and a sample-data label until then. Plan separately.
 
 ## Phase 6: Jobs feed
@@ -67,7 +67,7 @@ Do these first; everything later depends on them.
 - [ ] **6.2 Build.** Today's matches with reasons, save to board, "Not for me", posting page.
 
 ## Phase 7: Settings and launch
-- [ ] **7.1 Settings.** Name and email change, password change, Google connect/disconnect, appearance (light default, dark, match device), sessions and sign out other devices, export data (CSV), delete account.
+- [ ] **7.1 Settings.** Name and email change, password change, Google connect/disconnect, appearance (light default, dark, match device), sessions and sign out other devices, export data (CSV), delete account. Includes the dark-mode toggle in Sidebar (deferred from 0.4).
 - [ ] **7.2 Email notifications.** Via Resend: weekly check-in, interview reminders, quiet hours, per-type toggles.
 - [ ] **7.3 Launch checks.** Landing page matches the product, privacy policy and terms, error tracking, basic analytics.
 

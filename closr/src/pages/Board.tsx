@@ -1,23 +1,80 @@
 import { useState, type DragEvent } from 'react'
-import { useApplications, useDeleteApplication, useMoveApplication, useUpdateApplication } from '../lib/applications'
-import { CLOSE_REASON_LABEL, STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
+import { Briefcase, FileSpreadsheet, Link as LinkIcon, Plus, Search, Upload } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useApplications, useMoveApplication, useUpdateApplication } from '../lib/applications'
+import { isStale, nextInterviews } from '../lib/board'
+import { useInterviews } from '../lib/interviews'
+import { STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
 import AddJobModal from '../components/AddJobModal'
-import StatsStrip from '../components/StatsStrip'
 import ApplicationDrawer from '../components/ApplicationDrawer'
 import ChannelModal from '../components/ChannelModal'
+import JobCard from '../components/JobCard'
+import JobListView from '../components/JobListView'
+import { Mark } from '../components/Logo'
 import ReasonModal from '../components/ReasonModal'
-import { Button, TopBar } from '../components/ui'
+import { Button, Card, EmptyState, FilterChip, Input, Tabs, TopBar } from '../components/ui'
 
+type Layout = 'board' | 'list'
+type Filter = 'all' | 'remote' | 'hybrid' | 'onsite' | 'visa' | 'stale'
+
+const FILTERS: { value: Filter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'remote', label: 'Remote' },
+  { value: 'hybrid', label: 'Hybrid' },
+  { value: 'onsite', label: 'Onsite' },
+  { value: 'visa', label: 'Sponsors visa' },
+  { value: 'stale', label: 'Stale' },
+]
+
+// Hint shown in an empty column, and in the faded preview columns of an empty board.
+const EMPTY_HINT: Record<ApplicationStatus, string> = {
+  saved: 'Roles you want to apply to',
+  applied: 'Sent applications',
+  interviewing: 'Interviews in progress',
+  offer: 'Offers land here',
+  closed: 'Rejections and withdrawals',
+}
+
+// Board or list is a per-device preference, like the prototype's layout setting.
+const LAYOUT_KEY = 'closr-board-layout'
+function loadLayout(): Layout {
+  try {
+    return localStorage.getItem(LAYOUT_KEY) === 'list' ? 'list' : 'board'
+  } catch {
+    return 'board'
+  }
+}
+
+const matches = (a: Application, f: Filter) =>
+  f === 'all' ||
+  (f === 'visa' ? a.visa_sponsorship === 'yes' : f === 'stale' ? isStale(a) : a.work_mode === f)
+
+// Prototype `BoardScreen`: kanban or list, with filter chips and search.
 export default function Board() {
+  const navigate = useNavigate()
   const { data: apps = [], isLoading, error } = useApplications()
+  const { data: interviews = [] } = useInterviews()
   const move = useMoveApplication()
   const update = useUpdateApplication()
-  const [adding, setAdding] = useState<ApplicationStatus | null>(null)
+  const [layout, setLayoutState] = useState<Layout>(loadLayout)
+  const [filter, setFilter] = useState<Filter>('all')
+  const [q, setQ] = useState('')
+  const [adding, setAdding] = useState(false)
   const [dragOver, setDragOver] = useState<ApplicationStatus | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const [closing, setClosing] = useState<Application | null>(null)
   const [asking, setAsking] = useState<Application | null>(null)
   const openApp = apps.find((a) => a.id === openId)
+  const next = nextInterviews(interviews)
+
+  const setLayout = (l: Layout) => {
+    setLayoutState(l)
+    try {
+      localStorage.setItem(LAYOUT_KEY, l)
+    } catch {
+      // Storage unavailable (private window): the choice just isn't remembered.
+    }
+  }
 
   // Moving to Closed asks for a reason first; cancelling leaves the card where it was.
   // Moving to Interviewing asks what got you the interview (skippable), once per job.
@@ -35,69 +92,154 @@ export default function Board() {
     changeStatus(e.dataTransfer.getData('text/plain'), status)
   }
 
-  const active = apps.filter((a) => a.status !== 'saved' && a.status !== 'closed').length
+  const query = q.trim().toLowerCase()
+  const list = apps.filter(
+    (a) => matches(a, filter) && (!query || [a.role, a.company, a.location].join(' ').toLowerCase().includes(query)),
+  )
+  const applied = apps.filter((a) => a.status !== 'saved').length
+  const empty = !isLoading && apps.length === 0
 
   return (
-    <div className="min-w-0">
-      <div className="mb-6">
-        <TopBar title="Board" sub={`${apps.length} jobs · ${active} in play`}>
-          <Button onClick={() => setAdding('applied')}>+ Add a job</Button>
-        </TopBar>
-      </div>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-[18px]">
+      <TopBar
+        title="Board"
+        sub={
+          empty ? undefined : (
+            <span className="font-mono text-[13px]">
+              {apps.length} jobs · {applied} applied
+            </span>
+          )
+        }
+      >
+        <Button variant="secondary" icon={Upload} onClick={() => navigate('/import')}>
+          Import sheet
+        </Button>
+        <Button icon={Plus} onClick={() => setAdding(true)}>
+          Add job
+        </Button>
+      </TopBar>
 
-      {error && <p className="text-sm text-status-rejected">{error.message}</p>}
+      {error && <p className="text-sm text-coral-700">{error.message}</p>}
       {isLoading ? (
-        <p className="text-sm text-ink-muted">Loading…</p>
-      ) : (
+        <p className="text-sm text-ink-500">Loading…</p>
+      ) : empty ? (
         <>
-        <StatsStrip apps={apps} />
-        <div className="grid grid-flow-col auto-cols-[minmax(240px,1fr)] gap-4 overflow-x-auto pb-4">
-          {STATUSES.map((status) => {
-            const items = apps.filter((a) => a.status === status)
-            return (
-              <section
-                key={status}
-                onDragOver={(e) => {
-                  e.preventDefault()
-                  setDragOver(status)
-                }}
-                onDragLeave={() => setDragOver(null)}
-                onDrop={onDrop(status)}
-                className={`flex min-h-[60vh] flex-col rounded-xl border p-3 transition-colors ${
-                  dragOver === status ? 'border-brand bg-brand-soft' : 'border-line bg-surface/60'
-                }`}
-              >
-                <header className="mb-3 flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full" style={{ background: `var(--color-status-${status})` }} />
-                    <h2 className="text-sm font-semibold">{STATUS_LABEL[status]}</h2>
-                    <span className="font-mono text-xs text-ink-faint">{items.length}</span>
-                  </div>
-                  {/* New jobs can't start out Closed: closing one needs a reason. */}
-                  {status !== 'closed' && (
-                    <button
-                      onClick={() => setAdding(status)}
-                      className="rounded px-1.5 text-ink-faint hover:bg-canvas hover:text-ink"
-                      aria-label={`Add to ${STATUS_LABEL[status]}`}
-                    >
-                      +
-                    </button>
-                  )}
-                </header>
-                <div className="flex flex-col gap-2">
-                  {items.map((a) => (
-                    <Card key={a.id} app={a} onMove={changeStatus} onOpen={() => setOpenId(a.id)} />
-                  ))}
-                  {items.length === 0 && <p className="px-1 py-6 text-center text-xs text-ink-faint">Drop here</p>}
+          <Card>
+            <EmptyState
+              art={<Mark size={52} />}
+              title="Your board is ready for its first job"
+              body="Add a role you've applied to or have your eye on. Closr tracks the stage, reminds you to follow up, and keeps notes in one place."
+            >
+              <Button icon={LinkIcon} onClick={() => setAdding(true)}>
+                Paste a job link
+              </Button>
+              <Button variant="secondary" icon={FileSpreadsheet} onClick={() => navigate('/import')}>
+                Import a spreadsheet
+              </Button>
+              <Button variant="ghost" icon={Briefcase} onClick={() => navigate('/jobs')}>
+                Browse matches
+              </Button>
+            </EmptyState>
+          </Card>
+          <div aria-hidden="true" className="grid auto-cols-[minmax(170px,1fr)] grid-flow-col gap-3 overflow-x-auto opacity-70">
+            {STATUSES.map((s) => (
+              <section key={s} className="flex min-h-40 flex-col gap-2 rounded-2xl bg-paper-100 p-2.5">
+                <ColumnHeader status={s} count={0} />
+                <div className="rounded-xl border-[1.5px] border-dashed border-paper-400 px-2 py-3.5 text-center text-[13px] text-ink-500">
+                  {EMPTY_HINT[s]}
                 </div>
               </section>
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <Tabs
+              variant="pill"
+              value={layout}
+              onChange={setLayout}
+              items={[
+                { value: 'board', label: 'Board' },
+                { value: 'list', label: 'List' },
+              ]}
+            />
+            <span className="mx-1 h-[22px] w-px bg-paper-200" />
+            {FILTERS.map((f) => (
+              <FilterChip key={f.value} selected={filter === f.value} onClick={() => setFilter(f.value)}>
+                {f.label}
+              </FilterChip>
+            ))}
+            <Input
+              id="board-search"
+              icon={Search}
+              inputSize="sm"
+              type="search"
+              placeholder="Search jobs"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              wrapClassName="ml-auto w-[220px] max-w-full"
+            />
+          </div>
+
+          {list.length === 0 ? (
+            <Card sunken>
+              <EmptyState
+                compact
+                icon={Search}
+                tone="paper"
+                title={q ? `No jobs match "${q}"` : 'No jobs match this filter'}
+                body="Try a different filter or search term. Closed jobs are included in search."
+              >
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setFilter('all')
+                    setQ('')
+                  }}
+                >
+                  Clear filters
+                </Button>
+              </EmptyState>
+            </Card>
+          ) : layout === 'list' ? (
+            <JobListView apps={list} next={next} onOpen={setOpenId} />
+          ) : (
+            <div className="grid flex-1 auto-cols-[minmax(250px,1fr)] grid-flow-col items-start gap-3 overflow-x-auto pb-2">
+              {STATUSES.map((s) => {
+                const cards = list.filter((a) => a.status === s)
+                return (
+                  <section
+                    key={s}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      setDragOver(s)
+                    }}
+                    onDragLeave={() => setDragOver(null)}
+                    onDrop={onDrop(s)}
+                    className={`flex min-h-[420px] flex-col gap-2 rounded-2xl p-2.5 transition-colors ${
+                      dragOver === s ? 'bg-blue-50 shadow-[inset_0_0_0_2px_var(--color-blue-400)]' : 'bg-paper-100'
+                    }`}
+                  >
+                    <ColumnHeader status={s} count={cards.length} />
+                    {cards.map((a) => (
+                      <JobCard key={a.id} app={a} nextInterview={next.get(a.id)} onOpen={() => setOpenId(a.id)} />
+                    ))}
+                    {!cards.length && (
+                      <div className="rounded-xl border-[1.5px] border-dashed border-paper-400 px-2 py-3.5 text-center text-[13px] text-ink-500">
+                        {s === 'offer' ? 'Offers land here' : 'Drag a job here'}
+                      </div>
+                    )}
+                  </section>
+                )
+              })}
+            </div>
+          )}
         </>
       )}
 
-      {adding && <AddJobModal column={adding} onClose={() => setAdding(null)} />}
+      {adding && <AddJobModal onClose={() => setAdding(false)} />}
       {openApp && (
         <ApplicationDrawer
           app={openApp}
@@ -130,66 +272,12 @@ export default function Board() {
   )
 }
 
-function Card({
-  app,
-  onMove,
-  onOpen,
-}: {
-  app: Application
-  onMove: (id: string, s: ApplicationStatus) => void
-  onOpen: () => void
-}) {
-  const del = useDeleteApplication()
-  const closed = app.status === 'closed'
+function ColumnHeader({ status, count }: { status: ApplicationStatus; count: number }) {
   return (
-    <article
-      draggable
-      onDragStart={(e) => e.dataTransfer.setData('text/plain', app.id)}
-      // Clicks on the card's own link, status select and delete button shouldn't open the drawer.
-      onClick={(e) => !(e.target as HTMLElement).closest('a, button, select') && onOpen()}
-      // Closed cards are dimmed, as in the prototype's JobCard.
-      className={`group cursor-grab rounded-lg border border-line bg-surface p-3 shadow-sm active:cursor-grabbing ${closed ? 'opacity-[.72]' : ''}`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{app.company}</p>
-          <p className="truncate text-sm text-ink-muted">{app.role}</p>
-        </div>
-        {app.job_url && (
-          <a href={app.job_url} target="_blank" rel="noreferrer" className="text-xs text-brand hover:underline">
-            Link
-          </a>
-        )}
-      </div>
-      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-ink-faint">
-        {app.work_mode && <span className="rounded bg-canvas px-1.5 py-0.5 capitalize">{app.work_mode}</span>}
-        {app.location && <span className="truncate">{app.location}</span>}
-        {app.applied_at && !closed && <span className="ml-auto font-mono">{app.applied_at}</span>}
-      </div>
-      {/* JobCard's footer shows the close reason in place of the applied date. */}
-      {closed && (
-        <p className="mt-2 text-xs text-ink-500">{app.close_reason ? CLOSE_REASON_LABEL[app.close_reason] : 'Closed'}</p>
-      )}
-      {/* Status select doubles as the mobile-friendly alternative to drag-and-drop. */}
-      <div className="mt-2 flex items-center justify-between opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
-        <select
-          value={app.status}
-          onChange={(e) => onMove(app.id, e.target.value as ApplicationStatus)}
-          className="rounded border border-line bg-surface px-1 py-0.5 text-xs"
-        >
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {STATUS_LABEL[s]}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={() => confirm(`Delete ${app.company} — ${app.role}?`) && del.mutate(app.id)}
-          className="text-xs text-ink-faint hover:text-status-rejected"
-        >
-          Delete
-        </button>
-      </div>
-    </article>
+    <div className="flex items-center gap-2 px-1 pb-1.5 pt-1">
+      <span className="size-2 rounded-full" style={{ background: `var(--color-status-${status})` }} />
+      <h2 className="text-[15px] font-semibold leading-none tracking-[-0.01em] text-ink">{STATUS_LABEL[status]}</h2>
+      <span className="font-mono text-xs leading-none text-ink-500">{count}</span>
+    </div>
   )
 }

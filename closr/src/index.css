@@ -23,10 +23,11 @@
   --color-line: #E3E6EF;
   --color-line-strong: #CBD0DD;
 
-  --color-status-saved: #8A92A6;
+  /* Stage dots, as the prototype's --stage-*-dot. */
+  --color-status-saved: #8D92A2;
   --color-status-applied: #2346D9;
   --color-status-interviewing: #E9A100;
-  --color-status-offer: #1F9D61;
+  --color-status-offer: #1F9D6B;
   --color-status-closed: #A9BAD4;
   /* No longer a stage; still the app's error/destructive red. */
   --color-status-rejected: #D14343;
@@ -41,15 +42,20 @@
   --color-oxford-50: #F3F6FA;
   --color-overlay: rgb(0 21 46 / 0.42);
   --shadow-dialog: 0 4px 8px rgb(0 33 71 / 0.06), 0 18px 40px rgb(0 33 71 / 0.12);
+  --shadow-card: 0 1px 2px rgb(0 33 71 / 0.05), 0 2px 6px rgb(0 33 71 / 0.06);
+  --shadow-card-hover: 0 2px 4px rgb(0 33 71 / 0.05), 0 8px 20px rgb(0 33 71 / 0.08);
   --color-paper-50: #FBF8F3;
   --color-paper-100: #F5F0E8;
   --color-paper-200: #ECE5DA;
   --color-paper-300: #DDD4C6;
+  --color-paper-400: #C4B9A8;
   --color-ink-300: #B4B8C4;
   --color-ink-400: #8D92A2;
   --color-ink-500: #6B7184;
   --color-ink-700: #3A4258;
+  --color-blue-50: #F1F4FF;
   --color-blue-100: #E3E8FF;
+  --color-blue-400: #7D95FF;
   --color-blue-500: #4A66E8;
   --color-blue-600: #2346D9;
   --color-blue-700: #1A35A8;

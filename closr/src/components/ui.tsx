@@ -285,34 +285,71 @@ export function TopBar({ title, sub, children }: { title: string; sub?: ReactNod
   )
 }
 
-export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-2xl border border-paper-200 bg-white ${className}`}>{children}</div>
+export function Card({ children, sunken, className = '' }: { children: ReactNode; sunken?: boolean; className?: string }) {
+  const look = sunken ? 'border-transparent bg-paper-100' : 'border-paper-200 bg-white'
+  return <div className={`rounded-2xl border ${look} ${className}`}>{children}</div>
 }
 
 const EMPTY_TONES = { blue: 'bg-blue-100 text-blue-600', paper: 'bg-paper-200 text-ink-500' }
 
+// `art` replaces the icon tile (e.g. the Closr mark); `compact` is the smaller variant.
 export function EmptyState({
   icon: Icon,
+  art,
   title,
   body,
   tone = 'blue',
+  compact,
   children,
 }: {
-  icon: LucideIcon
+  icon?: LucideIcon
+  art?: ReactNode
   title: string
   body?: ReactNode
   tone?: keyof typeof EMPTY_TONES
+  compact?: boolean
   children?: ReactNode
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 px-5 py-9 text-center">
-      <div className={`flex size-14 items-center justify-center rounded-2xl ${EMPTY_TONES[tone]}`}>
-        <Icon size={28} />
-      </div>
-      <b className="text-xl font-semibold leading-[1.25] tracking-[-0.02em] text-ink [text-wrap:balance]">{title}</b>
+    <div className={`flex flex-col items-center text-center ${compact ? 'gap-2 px-3 py-5' : 'gap-3 px-5 py-9'}`}>
+      {art ??
+        (Icon && (
+          <div className={`flex items-center justify-center ${compact ? 'size-11 rounded-[13px]' : 'size-14 rounded-2xl'} ${EMPTY_TONES[tone]}`}>
+            <Icon size={compact ? 22 : 28} />
+          </div>
+        ))}
+      <b className={`font-semibold leading-[1.25] tracking-[-0.02em] text-ink [text-wrap:balance] ${compact ? 'text-base' : 'text-xl'}`}>{title}</b>
       {body && <p className="max-w-[420px] text-sm leading-normal text-ink-500">{body}</p>}
       {children && <div className="mt-1.5 flex flex-wrap justify-center gap-2">{children}</div>}
     </div>
+  )
+}
+
+// Small pill label (prototype `Badge`), optionally with a coloured dot.
+export function Badge({ className = 'bg-paper-200 text-ink-700', dot, children }: { className?: string; dot?: string; children: ReactNode }) {
+  return (
+    <span className={`inline-flex h-5 items-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[11px] font-semibold leading-none ${className}`}>
+      {dot && <span className={`size-[7px] shrink-0 rounded-full ${dot}`} />}
+      {children}
+    </span>
+  )
+}
+
+// Filter chip (prototype `Tag` with onClick).
+export function FilterChip({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
+      className={`inline-flex h-[30px] items-center whitespace-nowrap rounded-full border-[1.5px] px-3 text-[13px] font-medium leading-none transition-all active:scale-[.96] ${focusRing} ${
+        selected
+          ? 'border-oxford-900 bg-oxford-900 text-white hover:border-oxford-800 hover:bg-oxford-800'
+          : 'border-paper-300 bg-white text-ink-700 hover:border-ink-300 hover:text-ink'
+      }`}
+    >
+      {children}
+    </button>
   )
 }
 

@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { useUpdateApplication } from '../lib/applications'
+import { Trash2 } from 'lucide-react'
+import { useDeleteApplication, useUpdateApplication } from '../lib/applications'
+import { isStale, jobDays } from '../lib/board'
 import { useApplicationHistory } from '../lib/events'
 import { ago, daysAgo } from '../lib/format'
 import { groupInterviews, useInterviews } from '../lib/interviews'
@@ -23,8 +25,6 @@ import InterviewDialog from './InterviewDialog'
 import InterviewRow from './InterviewRow'
 import SalaryInput, { salaryDraft, salaryValues } from './SalaryInput'
 import { CompanyTile, Drawer, Field, Input, SectionTitle, Select, Tabs, TextArea } from './ui'
-
-const STALE_DAYS = 14
 
 const MODE_OPTIONS = [
   { value: '', label: 'Not set' },
@@ -54,6 +54,7 @@ export default function ApplicationDrawer({
   escapeEnabled?: boolean
 }) {
   const update = useUpdateApplication()
+  const remove = useDeleteApplication()
   const { data: allInterviews = [] } = useInterviews()
   const [editing, setEditing] = useState<Interview | 'new' | null>(null)
   const [salary, setSalary] = useState(() => salaryDraft(app))
@@ -70,8 +71,8 @@ export default function ApplicationDrawer({
     },
   })
 
-  const sinceDays = daysAgo(app.applied_at ?? app.created_at)
-  const stale = app.status === 'applied' && sinceDays >= STALE_DAYS
+  const sinceDays = jobDays(app)
+  const stale = isStale(app)
   const showOrigin = app.interview_origin != null || app.status === 'interviewing' || app.status === 'offer'
 
   return (
@@ -208,6 +209,22 @@ export default function ApplicationDrawer({
 
       <ApplicationContacts app={app} />
       <History applicationId={app.id} />
+
+      {/* Cards no longer carry a Delete button (as in the prototype), so it lives here. */}
+      <div className="border-t border-paper-200 pt-4">
+        <button
+          type="button"
+          onClick={() => {
+            if (!confirm(`Delete ${app.role} at ${app.company}? This can't be undone.`)) return
+            remove.mutate(app.id)
+            onClose()
+          }}
+          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-semibold text-coral-700 hover:bg-coral-100"
+        >
+          <Trash2 size={15} />
+          Delete job
+        </button>
+      </div>
 
       {editing && (
         <InterviewDialog interview={editing === 'new' ? undefined : editing} applicationId={app.id} onClose={() => setEditing(null)} />
