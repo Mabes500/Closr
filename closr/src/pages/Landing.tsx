@@ -24,15 +24,16 @@ const features = [
 ]
 
 export default function Landing() {
-  // Signed-in visitors skip the sign-in page and go straight to the board.
+  // Signed-in visitors skip sign-up and log-in and go straight to the board.
   const { session } = useAuth()
-  const start = session ? '/' : '/login'
+  const start = session ? '/' : '/signup'
+  const signIn = session ? '/' : '/login'
   return (
     <div className="min-h-full bg-surface">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <Logo size={26} />
         <div className="flex items-center gap-3 text-sm">
-          <Link to={start} className="font-medium text-ink-muted hover:text-ink">
+          <Link to={signIn} className="font-medium text-ink-muted hover:text-ink">
             Sign in
           </Link>
           <Link to={start} className="rounded-lg bg-brand px-4 py-2 font-medium text-white hover:bg-brand-hover">
@@ -116,7 +117,7 @@ export default function Landing() {
           <span className="inline-flex items-center gap-2">
             <Mark size={18} /> © {new Date().getFullYear()} Closr
           </span>
-          <Link to={start} className="hover:text-ink">
+          <Link to={signIn} className="hover:text-ink">
             Sign in
           </Link>
         </div>

@@ -1,89 +1,90 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { Mail } from 'lucide-react'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
-import { Logo } from '../components/Logo'
+import AuthShell, { AuthHead, FormError, OrRule, type Banner } from '../components/auth/AuthShell'
+import { GoogleButton, PasswordField, PrimaryButton, TextField, emailOk, linkClass } from '../components/auth/fields'
+import { supabase } from '../lib/supabase'
+
+// Other auth screens can pass a prefilled email and a banner (e.g. after a password reset).
+export type LoginState = { email?: string; banner?: Banner }
 
 export default function Login() {
   const { session, loading, authError } = useAuth()
-  const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const state = (useLocation().state ?? {}) as LoginState
+  const [email, setEmail] = useState(state.email ?? '')
+  const [pw, setPw] = useState('')
+  const [err, setErr] = useState<{ email?: string; pw?: string; form?: string }>({})
   const [busy, setBusy] = useState(false)
 
   if (loading) return null
   // Already signed in: / shows the board.
   if (session) return <Navigate to="/" replace />
 
-  // Return to the app root after Google or the email link; for a signed-in user that is the board.
-  // This URL must be listed under Supabase → Authentication → URL Configuration → Redirect URLs.
-  const redirectTo = `${window.location.origin}/`
-
-  async function sendLink(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault()
+    const er: typeof err = {}
+    if (!emailOk(email)) er.email = 'Enter the email you signed up with, like name@example.com.'
+    if (!pw) er.pw = 'Enter your password.'
+    setErr(er)
+    if (Object.keys(er).length) return
+
     setBusy(true)
-    setError(null)
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } })
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pw })
     setBusy(false)
-    if (error) setError(error.message)
-    else setSent(true)
+    if (!error) return navigate('/', { replace: true })
+    if (error.code === 'invalid_credentials')
+      setErr({ form: "That email and password don't match. Check for typos or reset your password." })
+    else if (error.code === 'email_not_confirmed')
+      setErr({ form: 'Confirm your email first. Check your inbox for the link we sent when you signed up.' })
+    else setErr({ form: error.message })
   }
 
-  async function google() {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } })
-    if (error) setError(error.message)
-  }
+  const formError = err.form ?? (authError && `Sign-in didn't complete: ${authError}. Please try again.`)
 
   return (
-    <div className="flex min-h-full items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex justify-center">
-          <Logo size={32} />
+    <AuthShell banner={state.banner}>
+      <AuthHead title="Welcome back" sub="Log in to pick up where you left off." />
+      <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+        {formError && <FormError>{formError}</FormError>}
+        <TextField
+          id="login-email"
+          label="Email"
+          type="email"
+          icon={Mail}
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={err.email}
+          autoFocus={!email}
+        />
+        <div className="flex flex-col gap-2">
+          <PasswordField
+            id="login-pw"
+            label="Password"
+            autoComplete="current-password"
+            value={pw}
+            onChange={(e) => setPw(e.target.value)}
+            error={err.pw}
+            autoFocus={!!email}
+          />
+          <Link to="/forgot" state={{ email }} className={`self-end text-[13px] ${linkClass}`}>
+            Forgot password?
+          </Link>
         </div>
-        <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
-          <h1 className="text-lg font-semibold">Sign in</h1>
-          <p className="mt-1 text-sm text-ink-muted">Track every application in one place.</p>
-
-          {sent ? (
-            <p className="mt-6 rounded-lg bg-brand-soft p-3 text-sm text-ink">
-              Check <span className="font-medium">{email}</span> for a sign-in link.
-            </p>
-          ) : (
-            <>
-              <button
-                onClick={google}
-                className="mt-6 w-full rounded-lg border border-line-strong bg-surface px-4 py-2.5 text-sm font-medium hover:bg-canvas"
-              >
-                Continue with Google
-              </button>
-              <div className="my-4 flex items-center gap-3 text-xs text-ink-faint">
-                <span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" />
-              </div>
-              <form onSubmit={sendLink} className="space-y-3">
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full rounded-lg border border-line-strong px-3 py-2.5 text-sm outline-none focus:border-brand"
-                />
-                <button
-                  disabled={busy}
-                  className="w-full rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-hover disabled:opacity-60"
-                >
-                  {busy ? 'Sending…' : 'Email me a sign-in link'}
-                </button>
-              </form>
-            </>
-          )}
-          {(error ?? authError) && (
-            <p className="mt-3 text-sm text-status-rejected">
-              {error ?? `Sign-in didn't complete: ${authError}. Please try again.`}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
+        <PrimaryButton type="submit" disabled={busy}>
+          {busy ? 'Logging in…' : 'Log in'}
+        </PrimaryButton>
+      </form>
+      <OrRule />
+      <GoogleButton onError={(m) => setErr({ form: m })}>Continue with Google</GoogleButton>
+      <p className="text-center text-sm text-ink-500">
+        New to Closr?{' '}
+        <Link to="/signup" className={linkClass}>
+          Create an account
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

@@ -6,6 +6,9 @@ import { isSupabaseConfigured } from './lib/supabase'
 import Layout from './components/Layout'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
+import Signup from './pages/Signup'
+import { ForgotPassword, ResetSent } from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Board from './pages/Board'
 import Interviews from './pages/Interviews'
 import Contacts from './pages/Contacts'
@@ -44,6 +47,10 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot" element={<ForgotPassword />} />
+            <Route path="/forgot/sent" element={<ResetSent />} />
+            <Route path="/reset" element={<ResetPassword />} />
             <Route
               element={
                 <RequireAuth>

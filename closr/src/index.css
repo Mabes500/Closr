@@ -28,6 +28,35 @@
   --color-status-interviewing: #E9A100;
   --color-status-offer: #1F9D61;
   --color-status-rejected: #D14343;
+
+  /* Palette from docs/prototype.html, named as there (e.g. --oxford-900 → bg-oxford-900).
+     Screens rebuilt to match the prototype use these. */
+  --color-oxford-900: #002147;
+  --color-oxford-800: #0E3360;
+  --color-paper-50: #FBF8F3;
+  --color-paper-100: #F5F0E8;
+  --color-paper-200: #ECE5DA;
+  --color-paper-300: #DDD4C6;
+  --color-ink-300: #B4B8C4;
+  --color-ink-400: #8D92A2;
+  --color-ink-500: #6B7184;
+  --color-ink-700: #3A4258;
+  --color-blue-100: #E3E8FF;
+  --color-blue-500: #4A66E8;
+  --color-blue-600: #2346D9;
+  --color-blue-700: #1A35A8;
+  --color-gold-100: #FDF1D3;
+  --color-gold-400: #F2B632;
+  --color-gold-500: #E9A100;
+  --color-gold-800: #7A5200;
+  --color-coral-100: #FCE7E0;
+  --color-coral-400: #F08A6E;
+  --color-coral-600: #D9502F;
+  --color-coral-700: #B23A22;
+  --color-mint-100: #DDF4EA;
+  --color-mint-600: #1F9D6B;
+  --color-mint-700: #137451;
+  --color-focus: rgb(125 149 255 / 0.4);
 }
 
 html, body, #root {
