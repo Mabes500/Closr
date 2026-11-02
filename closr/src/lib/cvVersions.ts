@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { StatusEvent } from './events'
+import { groupStats, type GroupStats } from './stats'
 import { supabase } from './supabase'
 import type { Application, CvVersion } from './types'
 
@@ -33,28 +34,8 @@ export function useSaveCvVersion() {
   })
 }
 
-// Below this many applications a version's response rate says little.
-export const MIN_TO_COMPARE = 5
+export { MIN_TO_COMPARE } from './stats'
+export type CvStats = GroupStats
 
-export type CvStats = { sent: number; responses: number; interviews: number; rate: number | null }
-
-// Per version: jobs sent with it (anything past Saved), responses (moved past Applied:
-// reached Interviewing or Offer, or closed as Rejected; "No response" doesn't count),
-// interviews (reached Interviewing or Offer), and the response rate.
-export function cvStats(apps: Application[], events: StatusEvent[]) {
-  const reachedInterview = new Set(
-    events.filter((e) => e.to_status === 'interviewing' || e.to_status === 'offer').map((e) => e.application_id),
-  )
-  const stats = new Map<string, CvStats>()
-  for (const a of apps) {
-    if (!a.cv_version_id || a.status === 'saved') continue
-    const s = stats.get(a.cv_version_id) ?? { sent: 0, responses: 0, interviews: 0, rate: null }
-    const interviewed = a.status === 'interviewing' || a.status === 'offer' || reachedInterview.has(a.id)
-    s.sent++
-    if (interviewed) s.interviews++
-    if (interviewed || (a.status === 'closed' && a.close_reason === 'rejected')) s.responses++
-    s.rate = s.responses / s.sent
-    stats.set(a.cv_version_id, s)
-  }
-  return stats
-}
+// Per version: jobs sent with it, responses, interviews and response rate (see groupStats).
+export const cvStats = (apps: Application[], events: StatusEvent[]) => groupStats(apps, events, (a) => a.cv_version_id)
