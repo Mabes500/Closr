@@ -6,6 +6,7 @@ import { isSupabaseConfigured } from './lib/supabase'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Board from './pages/Board'
+import Interviews from './pages/Interviews'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } })
 
@@ -45,6 +46,7 @@ export default function App() {
               }
             >
               <Route index element={<Board />} />
+              <Route path="interviews" element={<Interviews />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

@@ -46,5 +46,41 @@ export interface ApplicationEvent {
   created_at: string
 }
 
-export type NewApplication =Pick<Application, 'company' | 'role'> &
+export const INTERVIEW_FORMATS = ['video', 'phone', 'onsite'] as const
+export type InterviewFormat = (typeof INTERVIEW_FORMATS)[number]
+
+export const FORMAT_LABEL: Record<InterviewFormat, string> = {
+  video: 'Video',
+  phone: 'Phone',
+  onsite: 'Onsite',
+}
+
+export const INTERVIEW_OUTCOMES = ['pending', 'passed', 'failed', 'cancelled'] as const
+export type InterviewOutcome = (typeof INTERVIEW_OUTCOMES)[number]
+
+export const OUTCOME_LABEL: Record<InterviewOutcome, string> = {
+  pending: 'Pending',
+  passed: 'Passed',
+  failed: "Didn't pass",
+  cancelled: 'Cancelled',
+}
+
+export interface Interview {
+  id: string
+  application_id: string
+  user_id: string
+  round_name: string
+  scheduled_at: string
+  format: InterviewFormat | null
+  interviewer: string | null
+  notes: string | null
+  outcome: InterviewOutcome
+  created_at: string
+  updated_at: string
+}
+
+export type NewInterview = Pick<Interview, 'application_id' | 'round_name' | 'scheduled_at'> &
+  Partial<Pick<Interview, 'format' | 'interviewer' | 'notes' | 'outcome'>>
+
+export type NewApplication = Pick<Application, 'company' | 'role'> &
   Partial<Pick<Application, 'job_url' | 'location' | 'work_mode' | 'status' | 'salary' | 'source' | 'notes' | 'applied_at'>>

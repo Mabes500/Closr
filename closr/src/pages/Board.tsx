@@ -3,12 +3,15 @@ import { useApplications, useDeleteApplication, useMoveApplication } from '../li
 import { STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
 import AddApplicationDialog from '../components/AddApplicationDialog'
 import StatsStrip from '../components/StatsStrip'
+import ApplicationDrawer from '../components/ApplicationDrawer'
 
 export default function Board() {
   const { data: apps = [], isLoading, error } = useApplications()
   const move = useMoveApplication()
   const [adding, setAdding] = useState<ApplicationStatus | null>(null)
   const [dragOver, setDragOver] = useState<ApplicationStatus | null>(null)
+  const [openId, setOpenId] = useState<string | null>(null)
+  const openApp = apps.find((a) => a.id === openId)
 
   const onDrop = (status: ApplicationStatus) => (e: DragEvent) => {
     e.preventDefault()
@@ -75,7 +78,7 @@ export default function Board() {
                 </header>
                 <div className="flex flex-col gap-2">
                   {items.map((a) => (
-                    <Card key={a.id} app={a} onMove={move} />
+                    <Card key={a.id} app={a} onMove={move} onOpen={() => setOpenId(a.id)} />
                   ))}
                   {items.length === 0 && <p className="px-1 py-6 text-center text-xs text-ink-faint">Drop here</p>}
                 </div>
@@ -87,16 +90,27 @@ export default function Board() {
       )}
 
       {adding && <AddApplicationDialog defaultStatus={adding} onClose={() => setAdding(null)} />}
+      {openApp && <ApplicationDrawer app={openApp} onClose={() => setOpenId(null)} />}
     </div>
   )
 }
 
-function Card({ app, onMove }: { app: Application; onMove: (id: string, s: ApplicationStatus) => void }) {
+function Card({
+  app,
+  onMove,
+  onOpen,
+}: {
+  app: Application
+  onMove: (id: string, s: ApplicationStatus) => void
+  onOpen: () => void
+}) {
   const del = useDeleteApplication()
   return (
     <article
       draggable
       onDragStart={(e) => e.dataTransfer.setData('text/plain', app.id)}
+      // Clicks on the card's own link, status select and delete button shouldn't open the drawer.
+      onClick={(e) => !(e.target as HTMLElement).closest('a, button, select') && onOpen()}
       className="group cursor-grab rounded-lg border border-line bg-surface p-3 shadow-sm active:cursor-grabbing"
     >
       <div className="flex items-start justify-between gap-2">
