@@ -1,9 +1,8 @@
-import { Briefcase, Settings, type LucideIcon } from 'lucide-react'
+import { Settings, type LucideIcon } from 'lucide-react'
 import { Card, EmptyState, TopBar } from '../components/ui'
 
 // Placeholder for app-shell screens that aren't built yet (see docs/ROADMAP.md).
 const SCREENS: Record<string, { title: string; icon: LucideIcon; body: string }> = {
-  jobs: { title: 'Jobs', icon: Briefcase, body: 'Daily job matches based on your roles, location and visa needs.' },
   settings: { title: 'Settings', icon: Settings, body: 'Account, password, appearance, notifications and your data.' },
 }
 

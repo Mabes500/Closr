@@ -14,6 +14,8 @@ import Schedule from './pages/Schedule'
 import CvVersions from './pages/CvVersions'
 import Checkins from './pages/Checkins'
 import Goals from './pages/Goals'
+import Jobs from './pages/Jobs'
+import Posting from './pages/Posting'
 import ComingSoon from './pages/ComingSoon'
 import Onboarding from './pages/Onboarding'
 import Profile from './pages/Profile'
@@ -86,7 +88,8 @@ export default function App() {
               }
             >
               <Route index element={<Board />} />
-              <Route path="jobs" element={<ComingSoon screen="jobs" />} />
+              <Route path="jobs" element={<Jobs />} />
+              <Route path="jobs/:postingId" element={<Posting />} />
               <Route path="goals" element={<Goals />} />
               <Route path="checkins" element={<Checkins />} />
               <Route path="schedule" element={<Schedule />} />
