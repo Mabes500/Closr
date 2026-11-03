@@ -3,6 +3,7 @@ import { CalendarPlus, Send, Trash2 } from 'lucide-react'
 import { useDeleteApplication, useUpdateApplication } from '../lib/applications'
 import { isStale, jobDays } from '../lib/board'
 import { useApplicationHistory } from '../lib/events'
+import { useClosedPostings } from '../lib/jobs'
 import { ago, daysAgo } from '../lib/format'
 import { useReminders, whenDue } from '../lib/reminders'
 import {
@@ -58,6 +59,9 @@ export default function ApplicationDrawer({
   const { data: reminders = [] } = useReminders()
   const [editing, setEditing] = useState<ScheduleInit | null>(null)
   const [salary, setSalary] = useState(() => salaryDraft(app))
+  // Saved from the jobs feed: has the employer taken the posting down?
+  const { data: closedPostings } = useClosedPostings(app.job_posting_id ? [app.job_posting_id] : [])
+  const postingClosed = !!app.job_posting_id && !!closedPostings?.has(app.job_posting_id)
   // This job's open reminders, soonest (or most overdue) first.
   const upcoming = reminders
     .filter((r) => r.application_id === app.id && !r.done)
@@ -102,6 +106,9 @@ export default function ApplicationDrawer({
           onChange={(s) => onChangeStatus(app.id, s)}
           className="grid w-full grid-cols-5"
         />
+        {postingClosed && (
+          <p className="mx-0.5 mt-2.5 text-[13px] font-medium text-coral-700">This posting has closed. The employer no longer lists it.</p>
+        )}
         {app.status === 'closed' && (
           <p className="mx-0.5 mt-2.5 text-[13px] text-ink-500">
             Closed: {app.close_reason ? CLOSE_REASON_LABEL[app.close_reason] : 'no reason recorded'}

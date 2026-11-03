@@ -3,6 +3,7 @@ import { Briefcase, FileSpreadsheet, Link as LinkIcon, Plus, Search, Send, Uploa
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useApplications, useMoveApplication, useUpdateApplication } from '../lib/applications'
 import { isStale, nextReminders } from '../lib/board'
+import { useClosedPostings } from '../lib/jobs'
 import { plusDays, useReminders } from '../lib/reminders'
 import { useProfile } from '../lib/profile'
 import { STATUSES, STATUS_LABEL, type Application, type ApplicationStatus } from '../lib/types'
@@ -79,6 +80,8 @@ export default function Board() {
   const { data: profile } = useProfile()
   const openApp = apps.find((a) => a.id === openId)
   const next = nextReminders(reminders)
+  // Jobs saved from the feed whose posting has since closed.
+  const { data: closedPostings } = useClosedPostings(apps.flatMap((a) => (a.job_posting_id ? [a.job_posting_id] : [])))
 
   // Marked Applied → offer a follow-up a week out, unless turned off in Profile or one exists.
   const offerFollowUp = (app: Pick<Application, 'id' | 'company'>) => {
@@ -251,6 +254,7 @@ export default function Board() {
                         key={a.id}
                         app={a}
                         nextRem={next.get(a.id)}
+                        closed={!!a.job_posting_id && !!closedPostings?.has(a.job_posting_id)}
                         onOpen={() => setOpenId(a.id)}
                         onChangeStatus={changeStatus}
                       />
