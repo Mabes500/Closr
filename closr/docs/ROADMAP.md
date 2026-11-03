@@ -68,7 +68,7 @@ The plan is in [docs/JOBS-FEED-PLAN.md](JOBS-FEED-PLAN.md): sources and what's e
 - [x] **6.1 Plan.** Done: docs/JOBS-FEED-PLAN.md. Role matching should use the role catalogue in `src/data/roles.ts`: match postings on the catalogue titles and their aliases (e.g. a "SWE" posting matches a user who chose "Software engineer"), and fall back to plain text for roles users typed that aren't in the catalogue.
 - [x] **6.2a Data pipeline.** `job_boards` and `job_postings` tables with RLS; fetchers for Greenhouse, Lever and Ashby; normaliser; daily GitHub Actions workflow (`.github/workflows/jobs-feed.yml`, `scripts/jobs/`); starter list loader (`scripts/jobs/seed-boards.csv`); flywheel registration from paste-link and import. Also the plan's section 7: LinkedIn links are no longer fetched.
 - [x] **6.2b Enrichment.** Rules plus a Claude Haiku pass for new postings (role category and catalogue title, seniority, visa, region and time zone limits, remote eligibility), with a per-run cost cap and a dry-run mode. `scripts/jobs/rules.ts`, `scripts/jobs/enrich.ts`; Claude Haiku 5.5, about $0.0002 a posting; default cap $1 a run.
-- [ ] **6.2c Matching.** Profile fields (needs visa sponsorship, countries I can work in), scoring, `job_matches`, reasons.
+- [x] **6.2c Matching.** Profile fields (needs visa sponsorship, countries I can work in), scoring, `job_matches`, reasons. `scripts/jobs/matching.ts` (rules and scores), `scripts/jobs/match.ts` (daily step): up to 15 matches a person a day from postings first seen in the last 14 days; internships only for people looking for one.
 - [ ] **6.2d Jobs UI.** Jobs screen (today's matches, filters, empty states), posting page, save to board, "Not for me", closed state, bell notification.
 
 ## Phase 7: Settings and launch

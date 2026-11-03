@@ -78,3 +78,6 @@ jobs:
 
       - name: Enrich new postings
         run: node scripts/jobs/enrich.ts
+
+      - name: Match postings to people
+        run: node scripts/jobs/match.ts

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Check, Loader, MapPin, Wallet } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import RolePicker from '../components/RolePicker'
-import { Avatar, Input, Select, Switch, ToggleChip } from '../components/ui'
+import { Avatar, Input, RoleChip, Select, Switch, ToggleChip } from '../components/ui'
+import { COUNTRIES, countryName } from '../lib/countries'
 import { PACES, PACE_OPTIONS, STAGE_OPTIONS } from '../lib/onboarding'
 import { useProfile, useUpdateProfile } from '../lib/profile'
 import { PACE_TARGET, WORK_MODE_LABEL, type IdealStart, type Profile as ProfileRow, type WorkMode } from '../lib/types'
@@ -127,6 +128,47 @@ export default function Profile() {
                   )
                 })}
               </div>
+            </div>
+            {/* Used to match openings on Jobs (roadmap 6.2c). */}
+            <div className="flex flex-col gap-2.5">
+              <div className="text-[13px] font-semibold leading-[1.2] text-ink">Countries I can work in</div>
+              <div className="flex flex-wrap items-center gap-2">
+                {profile.work_countries.map((c) => (
+                  <RoleChip key={c} label={countryName(c)} onRemove={() => save({ work_countries: profile.work_countries.filter((x) => x !== c) })} />
+                ))}
+                <select
+                  value=""
+                  onChange={(e) => e.target.value && save({ work_countries: [...profile.work_countries, e.target.value] })}
+                  aria-label="Add a country you can work in"
+                  className="h-[34px] cursor-pointer rounded-full border-[1.5px] border-paper-300 bg-white px-3 text-sm text-ink-500 outline-none hover:border-ink-300 focus:border-blue-500"
+                >
+                  <option value="">+ Add a country</option>
+                  {COUNTRIES.filter((c) => !profile.work_countries.includes(c.code)).map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p className="text-xs text-ink-500">Where you're allowed to work, so remote roles limited to other countries are left out.</p>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              <div className="text-[13px] font-semibold leading-[1.2] text-ink">Do you need visa sponsorship?</div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { v: true, label: 'Yes, I need sponsorship' },
+                  { v: false, label: 'No' },
+                ].map(({ v, label }) => (
+                  <ToggleChip
+                    key={label}
+                    on={profile.needs_visa_sponsorship === v}
+                    onClick={() => save({ needs_visa_sponsorship: profile.needs_visa_sponsorship === v ? null : v })}
+                  >
+                    {label}
+                  </ToggleChip>
+                ))}
+              </div>
+              <p className="text-xs text-ink-500">If yes, jobs that say they can't sponsor are hidden and ones that do are shown first.</p>
             </div>
             <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
               <AutosaveInput

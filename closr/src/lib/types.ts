@@ -251,6 +251,10 @@ export interface Profile {
   suggest_follow_ups: boolean
   // IANA time zone, saved from the browser (roadmap 5.1), e.g. "Europe/London".
   time_zone: string | null
+  // Jobs feed matching (roadmap 6.2c). null = not answered.
+  needs_visa_sponsorship: boolean | null
+  // ISO 3166 codes, e.g. ['GB', 'DE'].
+  work_countries: string[]
   created_at: string
   updated_at: string
 }

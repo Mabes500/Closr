@@ -2,6 +2,7 @@
 // job_postings shape (docs/JOBS-FEED-PLAN.md, sections 1 and 3). No database here.
 
 import { decodeEntities, prettify, stripHtml, workModeFrom, type WorkMode } from '../../api/_lib/extract.ts'
+import { COUNTRY_BY_NAME } from '../../src/lib/countries.ts'
 
 export type Ats = 'greenhouse' | 'lever' | 'ashby'
 export type SalaryPeriod = 'year' | 'month' | 'week' | 'day' | 'hour'
@@ -129,33 +130,8 @@ export function cleanDescription(text: string | null): string | null {
   return t ? t.slice(0, MAX_DESCRIPTION) : null
 }
 
-// Country names (and common short forms) → ISO 3166 codes, built from the runtime's
-// own list of region names.
-const COUNTRY = new Map<string, string>()
-// Codes the runtime names that aren't current ISO countries: aliases (UK = GB), groups
-// (EU, UN...) and withdrawn codes (DD was East Germany, YU Yugoslavia...).
-const NOT_COUNTRIES = new Set(['UK', 'EU', 'EZ', 'UN', 'QO', 'XA', 'XB', 'ZZ', 'DD', 'FX', 'CS', 'YU', 'SU', 'ZR', 'TP', 'BU', 'NT', 'AN', 'QU'])
-{
-  const names = new Intl.DisplayNames(['en'], { type: 'region' })
-  for (let a = 65; a <= 90; a++)
-    for (let b = 65; b <= 90; b++) {
-      const code = String.fromCharCode(a, b)
-      let name: string | undefined
-      try {
-        name = names.of(code)
-      } catch {
-        continue
-      }
-      if (name && name !== code && !NOT_COUNTRIES.has(code) && !/unknown/i.test(name) && !COUNTRY.has(name.toLowerCase())) COUNTRY.set(name.toLowerCase(), code)
-    }
-  const extra: Record<string, string> = {
-    usa: 'US', us: 'US', 'u.s.': 'US', 'u.s.a.': 'US', 'united states of america': 'US', america: 'US',
-    uk: 'GB', 'u.k.': 'GB', england: 'GB', scotland: 'GB', wales: 'GB', 'northern ireland': 'GB', 'great britain': 'GB', britain: 'GB',
-    uae: 'AE', deutschland: 'DE', 'the netherlands': 'NL', holland: 'NL', czechia: 'CZ', 'czech republic': 'CZ', 'south korea': 'KR', korea: 'KR',
-    'hong kong sar': 'HK', türkiye: 'TR', turkey: 'TR', 'republic of ireland': 'IE',
-  }
-  for (const [k, v] of Object.entries(extra)) COUNTRY.set(k, v)
-}
+// Country names (and common short forms) → ISO 3166 codes (shared with the app).
+const COUNTRY = COUNTRY_BY_NAME
 // "San Francisco, CA" / "Toronto, ON": a trailing state or province code.
 const US_STATES = new Set('AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' '))
 const CA_PROVINCES = new Set('AB BC MB NB NL NS NT NU ON PE QC SK YT'.split(' '))
