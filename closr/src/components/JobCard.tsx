@@ -32,13 +32,13 @@ export function JobTags({ app }: { app: Application }) {
 export default function JobCard({
   app,
   nextRem,
-  closed,
+  postingClosed,
   onOpen,
   onChangeStatus,
 }: {
   app: Application
   // Saved from the jobs feed, and the employer has since taken the posting down.
-  closed?: boolean
+  postingClosed?: boolean
   // The job's next open reminder (prototype RemChip on the card).
   nextRem?: ReminderWithApp
   onOpen: () => void
@@ -88,7 +88,7 @@ export default function JobCard({
         <StageSelect app={app} onChange={onChangeStatus} onPicking={setPicking} />
       </div>
       {nextRem && <RemChip r={nextRem} compact />}
-      {closed && app.status === 'saved' && <span className="text-xs font-medium text-coral-700">This posting has closed</span>}
+      {postingClosed && app.status === 'saved' &&<span className="text-xs font-medium text-coral-700">This posting has closed</span>}
       <div className="flex items-center gap-2 text-xs leading-none text-ink-500">
         {foot ? (
           <span>{foot}</span>

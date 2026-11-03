@@ -254,7 +254,7 @@ export default function Board() {
                         key={a.id}
                         app={a}
                         nextRem={next.get(a.id)}
-                        closed={!!a.job_posting_id && !!closedPostings?.has(a.job_posting_id)}
+                        postingClosed={!!a.job_posting_id && !!closedPostings?.has(a.job_posting_id)}
                         onOpen={() => setOpenId(a.id)}
                         onChangeStatus={changeStatus}
                       />

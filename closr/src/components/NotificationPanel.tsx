@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AlarmClock, BellOff, Calendar, CalendarCheck, CheckCheck, X, Zap, type LucideIcon } from 'lucide-react'
+import { AlarmClock, BellOff, Calendar, CalendarCheck, CheckCheck, Sparkles, X, Zap, type LucideIcon } from 'lucide-react'
 import { KEEP_DAYS } from '../lib/notifications'
 import type { AppNotification, NotificationKind } from '../lib/types'
 import { Button, EmptyState, IconButton, Tabs } from './ui'
@@ -11,6 +11,7 @@ const NOTIF_KIND: Record<NotificationKind, { icon: LucideIcon; tone: string }> =
   deadline: { icon: AlarmClock, tone: 'bg-coral-100 text-coral-700' },
   checkin: { icon: CalendarCheck, tone: 'bg-blue-100 text-blue-700' },
   streak: { icon: Zap, tone: 'bg-gold-100 text-gold-800' },
+  matches: { icon: Sparkles, tone: 'bg-blue-100 text-blue-700' },
 }
 
 // "5m ago", "3h ago", "2d ago" (prototype `minsAgo`).

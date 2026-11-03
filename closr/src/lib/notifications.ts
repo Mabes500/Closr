@@ -77,6 +77,22 @@ export function streakNotifications(streak: number, startedOn: string): NewNotif
   ]
 }
 
+// "N new matches today": one per daily batch of job matches (roadmap 6.2d), counting the
+// ones not yet saved or dismissed when the batch is first seen.
+export function matchNotifications(day: string | null, fresh: number, today: string): NewNotification[] {
+  if (!day || !fresh || day < today) return []
+  return [
+    {
+      kind: 'matches',
+      reminder_id: null,
+      application_id: null,
+      title: `${fresh} new match${fresh === 1 ? '' : 'es'} today`,
+      body: "Picked for your roles from employers' own job boards.",
+      dedupe_key: `matches:${day}`,
+    },
+  ]
+}
+
 // Your notifications from the last 30 days, newest first (cleared ones hidden).
 export function useNotifications() {
   return useQuery({

@@ -21,8 +21,10 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { useApplications } from '../lib/applications'
 import { useCheckins } from '../lib/checkins'
+import { latestDay, useMatches } from '../lib/jobs'
 import {
   checkinNotifications,
+  matchNotifications,
   notificationsFor,
   streakNotifications,
   useNotifications,
@@ -88,9 +90,17 @@ export default function AppShell() {
   const { data: reminders } = useReminders()
   const checkins = useCheckins()
   const progress = useWeekProgress()
+  const { data: matches } = useMatches()
+  const matchDay = latestDay(matches ?? [])
+  const newMatches = (matches ?? []).filter((m) => m.match_date === matchDay && m.status === 'new').length
   useSyncNotifications(
-    reminders && checkins && progress.loaded
-      ? [...notificationsFor(reminders), ...checkinNotifications(checkins), ...streakNotifications(progress.streak, progress.startedOn)]
+    reminders && checkins && progress.loaded && matches
+      ? [
+          ...notificationsFor(reminders),
+          ...checkinNotifications(checkins),
+          ...streakNotifications(progress.streak, progress.startedOn),
+          ...matchNotifications(matchDay, newMatches, progress.today),
+        ]
       : null,
   )
   const { data: notifs = [] } = useNotifications()
@@ -107,6 +117,7 @@ export default function AppShell() {
     setBell(false)
     if (n.kind === 'checkin') navigate('/checkins')
     else if (n.kind === 'streak') navigate('/goals')
+    else if (n.kind === 'matches') navigate('/jobs')
     else if (n.application_id) navigate('/', { state: { open: n.application_id } })
     else navigate('/schedule')
   }
@@ -121,6 +132,7 @@ export default function AppShell() {
       unread={unread}
       onBell={openBell}
       checkinsDue={checkins?.length ?? 0}
+      newMatches={newMatches}
       streak={progress.loaded ? progress : null}
     />
   )
@@ -183,6 +195,7 @@ function Sidebar({
   unread,
   onBell,
   checkinsDue,
+  newMatches,
   streak,
 }: {
   onClose?: () => void
@@ -190,6 +203,7 @@ function Sidebar({
   unread: number
   onBell: () => void
   checkinsDue: number
+  newMatches: number
   streak: { streak: number; activeToday: boolean } | null
 }) {
   const { session } = useAuth()
@@ -202,8 +216,9 @@ function Sidebar({
   const meta = session?.user.user_metadata ?? {}
   const email = session?.user.email ?? ''
   const name: string = profile?.full_name || meta.full_name || meta.name || email.split('@')[0] || 'You'
-  const current = pathname
-  const counts: Record<string, number> = { '/': apps.filter((a) => a.status !== 'closed').length, '/checkins': checkinsDue }
+  // A posting page belongs to Jobs.
+  const current = pathname.startsWith('/jobs/') ? '/jobs' : pathname
+  const counts: Record<string, number> = { '/': apps.filter((a) => a.status !== 'closed').length, '/jobs': newMatches, '/checkins': checkinsDue }
   const inAccount = pathname === '/profile' || pathname === '/settings'
 
   return (
