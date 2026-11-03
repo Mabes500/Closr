@@ -74,7 +74,9 @@ async function rulesPass(db: Db) {
   })
   if (!DRY_RUN) await save(db, updates)
   const withRole = updates.filter((u) => u.role_category).length
-  return { postings: rows.length, withRole, complete }
+  // A dry run saves nothing, so the AI step's estimate uses these results instead.
+  const pending = new Map(updates.map((u) => [u.id, { role_category: u.role_category, done: !!u.ai_checked_at }]))
+  return { postings: rows.length, withRole, complete, pending }
 }
 
 // ---------------------------------------------------------------------------
@@ -164,12 +166,20 @@ function merge(p: AiRow, ai: AiResult) {
   }
 }
 
-async function aiPass(db: Db) {
+async function aiPass(db: Db, pending: Map<string, { role_category: string | null; done: boolean }>) {
   const targeted = await targetedCategories(db)
-  // Light read first (no descriptions): which open, unchecked postings qualify.
-  const light = await byId<{ id: string; role_category: string | null; first_seen_at: string }>(db, 'id, role_category, first_seen_at', (q) =>
-    q.is('ai_checked_at', null).is('closed_at', null).not('enriched_at', 'is', null),
+  // Light read first (no descriptions): which open, unchecked postings qualify. In a dry
+  // run the rules results weren't saved, so they're applied from `pending`.
+  const rows = await byId<{ id: string; role_category: string | null; first_seen_at: string; enriched_at: string | null }>(
+    db,
+    'id, role_category, first_seen_at, enriched_at',
+    (q) => q.is('ai_checked_at', null).is('closed_at', null),
   )
+  const light = rows.flatMap((r) => {
+    const p = pending.get(r.id)
+    if (p) return p.done ? [] : [{ ...r, role_category: p.role_category }]
+    return r.enriched_at ? [r] : []
+  })
   // Targeted categories first, then unknown ones; newest first within each.
   const queue = light
     .filter((p) => (p.role_category ? targeted.has(p.role_category as RoleCategory) : true))
@@ -266,10 +276,10 @@ async function aiPass(db: Db) {
 async function main() {
   const db = connect()
   const started = Date.now()
-  console.log(`${DRY_RUN ? '[dry run] ' : ''}Enriching new postings (AI cost cap $${COST_CAP_USD.toFixed(2)})…`)
+  console.log(`${DRY_RUN ? '[dry run] ' : ''}Enriching new postings (AI cost cap $${COST_CAP_USD})…`)
   const rules = await rulesPass(db)
   console.log(`Rules: ${rules.postings} new posting(s); role found for ${rules.withRole}; ${rules.complete} complete without AI.`)
-  const ai = await aiPass(db)
+  const ai = await aiPass(db, DRY_RUN ? rules.pending : new Map())
   const minutes = ((Date.now() - started) / 60_000).toFixed(1)
   const cost = DRY_RUN ? `estimated $${ai.estimated.toFixed(3)}` : `$${ai.spent.toFixed(4)}`
   console.log(

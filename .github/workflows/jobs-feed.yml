@@ -3,10 +3,12 @@
 # the postings to job_postings. Run it by hand from the Actions tab: "Jobs feed" →
 # "Run workflow".
 #
-# Needs two repository secrets (Settings → Secrets and variables → Actions):
+# Repository secrets (Settings → Secrets and variables → Actions):
 #   SUPABASE_URL               the Supabase Project URL (same value as VITE_SUPABASE_URL)
 #   SUPABASE_SERVICE_ROLE_KEY  Supabase → Project Settings → API Keys → secret key
-# The secret key bypasses Row Level Security. It lives only here, never in the app.
+#   ANTHROPIC_API_KEY          console.anthropic.com → API Keys (optional: enrichment's
+#                              AI step is skipped without it)
+# These keys live only here, never in the app.
 
 name: Jobs feed
 
@@ -27,6 +29,10 @@ on:
         description: 'Only read this many boards (leave empty for all)'
         type: string
         default: ''
+      cost_cap:
+        description: 'Most to spend on AI enrichment this run, in US dollars'
+        type: string
+        default: '1'
 
 # Never two runs at once.
 concurrency:
@@ -48,6 +54,9 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
       LIMIT: ${{ inputs.limit }}
+      # Enrichment (6.2b). Without the key, the AI part is skipped and only rules run.
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ENRICH_COST_CAP_USD: ${{ inputs.cost_cap || '1' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -66,3 +75,6 @@ jobs:
 
       - name: Read job boards
         run: node scripts/jobs/run.ts
+
+      - name: Enrich new postings
+        run: node scripts/jobs/enrich.ts
