@@ -1,4 +1,4 @@
-import type { Role } from '../data/roles'
+import type { Role } from '../data/roles.ts'
 
 // Search over the role catalogue (src/data/roles.ts): titles and aliases, case-insensitive,
 // tolerant of small typos. Exact and starts-with matches rank first.
