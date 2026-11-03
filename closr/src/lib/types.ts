@@ -96,6 +96,8 @@ export interface Application {
   cv_version_id: string | null
   // Last "No reply yet" answer on a check-in (roadmap 4.2); asked again 7 days later.
   checked_in_at: string | null
+  // The jobs feed posting it was saved from (roadmap 6.2d), for "This posting has closed".
+  job_posting_id: string | null
   notes: string | null
   applied_at: string | null
   position: number
@@ -278,8 +280,49 @@ export type NewApplication = Pick<Application, 'company' | 'role'> &
       | 'notes'
       | 'applied_at'
       | 'cv_version_id'
+      | 'job_posting_id'
     >
   >
+
+// Jobs feed (roadmap 6.2). Postings are shared, read-only reference data; matches are per user.
+export interface JobPosting {
+  id: string
+  source: 'greenhouse' | 'lever' | 'ashby'
+  company: string
+  title: string
+  location: string | null
+  countries: string[]
+  work_mode: WorkMode | null
+  salary_min: number | null
+  salary_max: number | null
+  salary_currency: string | null
+  salary_period: 'year' | 'month' | 'week' | 'day' | 'hour' | null
+  description: string | null
+  apply_url: string
+  posted_at: string | null
+  first_seen_at: string
+  closed_at: string | null
+  role_title: string | null
+  seniority: string | null
+  visa_sponsorship: 'yes' | 'no' | 'not_stated' | null
+  remote_regions: string[]
+  remote_countries: string[]
+  timezone_note: string | null
+}
+
+export type MatchStatus = 'new' | 'saved' | 'dismissed'
+
+export interface JobMatch {
+  id: string
+  user_id: string
+  posting_id: string
+  score: number
+  reasons: string[]
+  match_date: string
+  status: MatchStatus
+  dismiss_reason: string | null
+  created_at: string
+}
 
 // CV/résumé versions (roadmap 4.1, prototype CVS). Archived ones are hidden from pickers.
 export interface CvVersion {
