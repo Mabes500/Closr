@@ -1,8 +1,8 @@
 import { BellRing, ChartNoAxesColumn, KanbanSquare, Link2, MessageCircleQuestion, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
-import { Logo } from '../components/Logo'
 import PublicFooter from '../components/PublicFooter'
+import PublicHeader from '../components/PublicHeader'
 
 const columns = [
   { label: 'Applied', dot: 'bg-status-applied', cards: [['Northwind', 'Product Engineer', 'Follow up Thu'], ['Kestrel Pay', 'Backend Engineer', 'Remote']] },
@@ -23,8 +23,8 @@ const features = [
   },
   {
     icon: Sparkles,
-    title: 'Matching jobs every day',
-    body: 'New openings from company career pages, matched to your target roles, the countries you can work in and your visa needs.',
+    title: 'New matching jobs all day',
+    body: 'Fresh openings from company career pages, matched to your target roles, the countries you can work in and your visa needs.',
   },
   {
     icon: BellRing,
@@ -47,20 +47,9 @@ export default function Landing() {
   // Signed-in visitors skip sign-up and log-in and go straight to the board.
   const { session } = useAuth()
   const start = session ? '/' : '/signup'
-  const logIn = session ? '/' : '/login'
   return (
     <div className="min-h-full bg-paper-50">
-      <header className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-6 py-5">
-        <Logo size={26} />
-        <div className="flex items-center gap-4 text-sm">
-          <Link to={logIn} className="font-semibold text-ink-700 hover:text-ink">
-            Log in
-          </Link>
-          <Link to={start} className="rounded-xl bg-action px-4 py-2 font-semibold text-on-action hover:bg-action-hover">
-            Get started free
-          </Link>
-        </div>
-      </header>
+      <PublicHeader />
 
       <section className="mx-auto max-w-6xl px-6 pb-20 pt-12 text-center sm:pt-20">
         <p className="mx-auto inline-flex items-center gap-2 rounded-full bg-gold-100 px-3 py-1 text-xs font-semibold text-gold-800">

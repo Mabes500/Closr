@@ -93,9 +93,15 @@ async function sendEmail(to: string, userId: string, items: EmailItem[]) {
     if (r.ok) return ((await r.json()) as { id?: string }).id ?? null
     // A bad key or an unverified domain fails for everyone, so stop rather than retry each person.
     if (r.status === 401 || r.status === 403) throw new StopSending(`Resend refused the request (${r.status}). Check RESEND_API_KEY and that the EMAIL_FROM domain is verified.`)
-    if (r.status === 429 && attempt < 2) {
-      await sleep((Number(r.headers.get('retry-after')) || 2) * 1000)
-      continue
+    if (r.status === 429) {
+      // Out of allowance for the day or month: nobody else can be sent to either. Their items
+      // stay unsent, so a later run delivers them once there's allowance again.
+      const body = await r.text()
+      if (/quota/i.test(body)) throw new StopSending('Resend sending limit reached. Remaining emails will go out once there is allowance again; check your plan at resend.com.')
+      if (attempt < 3) {
+        await sleep((Number(r.headers.get('retry-after')) || 2) * 1000)
+        continue
+      }
     }
     throw new Error(`Resend answered ${r.status}`)
   }

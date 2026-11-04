@@ -8,6 +8,10 @@
 #   EMAIL_FROM                                e.g. Closr <hello@heyclosr.app>, on a domain verified in Resend
 #   EMAIL_UNSUBSCRIBE_SECRET                  a long random value; must match the one in Vercel
 # Until the email secrets exist, each run does nothing and stays green.
+#
+# Supabase Cron starts this on time (supabase/migrations/20261110000000_feed_schedule.sql);
+# GitHub's schedule below can run late and is the backup. An item is never emailed twice,
+# so overlap is harmless.
 
 name: Email notifications
 

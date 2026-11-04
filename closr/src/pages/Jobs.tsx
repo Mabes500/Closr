@@ -75,7 +75,7 @@ export default function Jobs() {
             <EmptyState
               icon={Sparkles}
               title="Finding your first matches"
-              body={`We check employers' job boards every morning for ${roles.join(', ').toLowerCase()} roles. Your first matches arrive within 24 hours.`}
+              body={`We check employers' job boards every few hours for ${roles.join(', ').toLowerCase()} roles. Your first matches usually arrive within a few hours.`}
             >
               <Button variant="secondary" icon={Pencil} onClick={() => navigate('/profile')}>
                 Refine what you're looking for
@@ -85,7 +85,7 @@ export default function Jobs() {
               </Button>
             </EmptyState>
           ) : (
-            <EmptyState icon={Sparkles} title="Tell us what you're looking for" body="Add the roles you want in your profile, and matches start arriving the next morning.">
+            <EmptyState icon={Sparkles} title="Tell us what you're looking for" body="Add the roles you want in your profile, and matches start arriving within a few hours.">
               <Button icon={Pencil} onClick={() => navigate('/profile')}>
                 Add target roles
               </Button>
@@ -111,7 +111,7 @@ export default function Jobs() {
             {!shown.length && (
               <Card sunken>
                 {todays.every((m) => m.status !== 'new') ? (
-                  <EmptyState compact icon={CircleCheck} title="You've been through today's matches" body="New matches arrive tomorrow morning. Saved ones are on your board.">
+                  <EmptyState compact icon={CircleCheck} title="You've been through today's matches" body="We check for new matches every few hours. Saved ones are on your board.">
                     <Button size="sm" variant="secondary" onClick={() => navigate('/')}>
                       Go to board
                     </Button>

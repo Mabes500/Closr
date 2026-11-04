@@ -40,7 +40,7 @@ Filling it:
 
 ## 3. Pipeline
 
-Runs once a day as a **GitHub Actions scheduled workflow** (free, long runtime, visible logs, no extra tools for the owner). It uses the Supabase service-role key stored as a GitHub secret, never in the app.
+Runs every 3 hours (first built to run daily; see roadmap 7.4) as a **GitHub Actions scheduled workflow** (free, long runtime, visible logs, no extra tools for the owner). It uses the Supabase service-role key stored as a GitHub secret, never in the app.
 
 1. **Fetch.** Read every active board, a few at a time with polite pacing and an honest user agent. Retry once, then record the failure.
 2. **Normalise.** Map each ATS's fields to one `job_postings` shape: source, external id, company, title, location text, countries, work mode, salary min/max/currency/period, description (plain text, emails and phone numbers stripped), apply URL, posted_at, first_seen_at, last_seen_at, closed_at.

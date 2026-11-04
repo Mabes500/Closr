@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { lazy, Suspense, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
@@ -23,6 +23,10 @@ import Import from './pages/Import'
 import { Privacy, Terms } from './pages/Legal'
 import { useProfile } from './lib/profile'
 import { reportError } from './lib/monitoring'
+
+// Loaded only when someone visits the blog, so the app itself stays lighter.
+const BlogIndex = lazy(() => import('./pages/Blog').then((m) => ({ default: m.BlogIndex })))
+const BlogPostPage = lazy(() => import('./pages/Blog').then((m) => ({ default: m.BlogPostPage })))
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000 } },
@@ -78,6 +82,22 @@ export default function App() {
             <Route path="/reset" element={<ResetPassword />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route
+              path="/blog"
+              element={
+                <Suspense fallback={null}>
+                  <BlogIndex />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/blog/:slug"
+              element={
+                <Suspense fallback={null}>
+                  <BlogPostPage />
+                </Suspense>
+              }
+            />
             <Route
               path="/welcome"
               element={

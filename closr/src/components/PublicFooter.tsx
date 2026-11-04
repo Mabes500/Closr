@@ -11,6 +11,9 @@ export default function PublicFooter() {
           <Mark size={18} /> © {new Date().getFullYear()} Closr
         </span>
         <nav className="flex flex-wrap gap-x-5 gap-y-2">
+          <Link to="/blog" className="hover:text-ink">
+            Blog
+          </Link>
           <Link to="/privacy" className="hover:text-ink">
             Privacy
           </Link>

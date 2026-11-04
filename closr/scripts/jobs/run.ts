@@ -1,4 +1,4 @@
-// The daily jobs feed run (roadmap 6.2a, docs/JOBS-FEED-PLAN.md section 3, steps 1–3).
+// The jobs feed run, every 3 hours (roadmap 6.2a, docs/JOBS-FEED-PLAN.md section 3, steps 1–3).
 //
 //   node scripts/jobs/run.ts            read every board, save postings
 //   DRY_RUN=true node scripts/jobs/run.ts   read and count, write nothing
@@ -7,6 +7,7 @@
 // Needs SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (GitHub secrets in the workflow).
 // Enrichment (6.2b) and matching (6.2c) come later.
 
+import { createHash } from 'node:crypto'
 import { appendFileSync } from 'node:fs'
 import { fetchBoard, normalise, type Ats, type Board, type Posting } from './ats.ts'
 import { all, chunks, connect, pool, type Db } from './db.ts'
@@ -26,31 +27,44 @@ const blank = (): Counts => ({ boards: 0, ok: 0, empty: 0, failed: 0, jobs: 0, n
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 const daysSince = (iso: string | null) => (iso ? (Date.now() - Date.parse(iso)) / DAY : Infinity)
 
-// Inserts new postings, refreshes existing ones (last_seen_at, reopened if they came
-// back), and closes this board's postings that are no longer listed.
+// A brief database hiccup shouldn't lose a board: try again before giving up.
+async function withRetry(what: string, write: () => PromiseLike<{ error: { message: string } | null }>) {
+  for (let attempt = 1; ; attempt++) {
+    const { error } = await write()
+    if (!error) return
+    if (attempt >= 3) throw new Error(`${what}: ${error.message}`)
+    await sleep(attempt * 3_000)
+  }
+}
+
+const fingerprint = (p: Posting) => createHash('sha256').update(JSON.stringify(p)).digest('hex')
+
+// Inserts new postings, rewrites only those that changed or came back, and closes this
+// board's postings that are no longer listed. Unchanged postings aren't touched, so running
+// often doesn't fill the database.
 async function save(db: Db, board: BoardRow, postings: Posting[]) {
   const now = new Date().toISOString()
-  const existing = await all<{ id: string; external_id: string; closed_at: string | null }>((a, b) =>
-    db.from('job_postings').select('id, external_id, closed_at').eq('board_id', board.id).range(a, b),
+  const existing = await all<{ id: string; external_id: string; closed_at: string | null; work_mode: string | null; content_hash: string | null }>((a, b) =>
+    db.from('job_postings').select('id, external_id, closed_at, work_mode, content_hash').eq('board_id', board.id).order('id').range(a, b),
   )
-  const known = new Set(existing.map((e) => e.external_id))
+  const known = new Map(existing.map((e) => [e.external_id, e]))
   const listed = new Set(postings.map((p) => p.external_id))
 
   // first_seen_at is left out, so it's set once on insert and never overwritten.
-  const rows = postings.map((p) => ({ ...p, board_id: board.id, last_seen_at: now, closed_at: null }))
-  for (const part of chunks(rows, 200)) {
-    const { error } = await db.from('job_postings').upsert(part, { onConflict: 'source,external_id' })
-    if (error) throw new Error(`saving postings: ${error.message}`)
-  }
+  const rows = postings.flatMap((p) => {
+    const hash = fingerprint(p)
+    const was = known.get(p.external_id)
+    if (was && was.content_hash === hash && !was.closed_at) return []
+    // A blank work mode here must not erase one the AI found in the description.
+    return [{ ...p, work_mode: p.work_mode ?? was?.work_mode ?? null, content_hash: hash, board_id: board.id, last_seen_at: now, closed_at: null }]
+  })
+  for (const part of chunks(rows, 200)) await withRetry('saving postings', () => db.from('job_postings').upsert(part, { onConflict: 'source,external_id' }))
 
   const toClose = existing.filter((e) => !e.closed_at && !listed.has(e.external_id)).map((e) => e.id)
-  for (const ids of chunks(toClose, 200)) {
-    const { error } = await db.from('job_postings').update({ closed_at: now }).in('id', ids)
-    if (error) throw new Error(`closing postings: ${error.message}`)
-  }
+  for (const ids of chunks(toClose, 200)) await withRetry('closing postings', () => db.from('job_postings').update({ closed_at: now }).in('id', ids))
 
   const added = postings.filter((p) => !known.has(p.external_id)).length
-  return { new: added, updated: postings.length - added, closed: toClose.length }
+  return { new: added, updated: rows.length - added, closed: toClose.length }
 }
 
 async function main() {
@@ -67,6 +81,7 @@ async function main() {
   const bySource: Record<Ats, Counts> = { greenhouse: blank(), lever: blank(), ashby: blank() }
   const failures: string[] = []
   let dbErrors = 0
+  const dbMessages = new Set<string>() // what went wrong, for the run's summary page
 
   await pool(boards, CONCURRENCY, async (board) => {
     const c = bySource[board.ats]
@@ -101,7 +116,10 @@ async function main() {
       }
     } catch (e) {
       const message = (e as Error).message
-      if (/^(saving|closing|database)/.test(message)) dbErrors++
+      if (/^(saving|closing|database)/.test(message)) {
+        dbErrors++
+        dbMessages.add(message.slice(0, 300))
+      }
       c.failed++
       failures.push(`${board.ats}/${board.slug}: ${message}`)
       const unhealthySince = board.unhealthy_since ?? now
@@ -151,6 +169,7 @@ async function main() {
         ...Object.entries(bySource).map(([k, c]) => line(k, c)),
         line('**total**', total),
         '',
+        ...(dbMessages.size ? [`**${dbErrors} database error(s):**`, '', ...[...dbMessages].slice(0, 5).map((m) => `- ${m}`), ''] : []),
       ].join('\n'),
     )
   }

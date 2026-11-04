@@ -39,7 +39,7 @@ type Json = Record<string, unknown>
 // Fetching: an honest user agent, a timeout, one retry, then give up.
 // ---------------------------------------------------------------------------
 const repo = process.env.GITHUB_REPOSITORY ? `https://github.com/${process.env.GITHUB_REPOSITORY}` : 'Closr job search tracker'
-export const USER_AGENT = `ClosrJobsFeed/1.0 (reads public job board APIs once a day; ${process.env.FEED_CONTACT ?? repo})`
+export const USER_AGENT = `ClosrJobsFeed/1.0 (reads public job board APIs a few times a day;${process.env.FEED_CONTACT ?? repo})`
 
 export class FetchFailed extends Error {
   status: number | null

@@ -1,7 +1,9 @@
 # Jobs feed (roadmap 6.2a, closr/docs/JOBS-FEED-PLAN.md section 3).
-# Once a day, reads every employer job board in Supabase's job_boards table and saves
-# the postings to job_postings. Run it by hand from the Actions tab: "Jobs feed" →
-# "Run workflow".
+# Every 3 hours, reads every employer job board in Supabase's job_boards table, saves
+# what's new or changed to job_postings, then enriches and matches. Run it by hand from the
+# Actions tab: "Jobs feed" → "Run workflow". Supabase Cron starts it on time (see
+# supabase/migrations/20261110000000_feed_schedule.sql); GitHub's schedule here can run late
+# and is the backup. A second run finds nothing new, so overlap is harmless.
 #
 # Repository secrets (Settings → Secrets and variables → Actions):
 #   SUPABASE_URL               the Supabase Project URL (same value as VITE_SUPABASE_URL)
@@ -14,7 +16,7 @@ name: Jobs feed
 
 on:
   schedule:
-    - cron: '30 4 * * *' # every day at 04:30 UTC
+    - cron: '30 */3 * * *' # every 3 hours
   workflow_dispatch:
     inputs:
       load_seed:
@@ -74,10 +76,15 @@ jobs:
         run: node scripts/jobs/load-seed.ts
 
       - name: Read job boards
+        id: read
         run: node scripts/jobs/run.ts
 
+      # If some boards couldn't be saved, people should still get matches from the rest.
+      # The run still shows red, so the problem gets noticed.
       - name: Enrich new postings
+        if: ${{ !cancelled() && (steps.read.outcome == 'success' || steps.read.outcome == 'failure') }}
         run: node scripts/jobs/enrich.ts
 
       - name: Match postings to people
+        if: ${{ !cancelled() && (steps.read.outcome == 'success' || steps.read.outcome == 'failure') }}
         run: node scripts/jobs/match.ts
