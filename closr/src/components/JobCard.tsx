@@ -69,7 +69,7 @@ export default function JobCard({
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"
       tabIndex={0}
-      className={`flex cursor-pointer flex-col gap-2.5 rounded-2xl border border-paper-200 bg-white p-3.5 shadow-card transition-[box-shadow,transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-paper-300 hover:shadow-card-hover focus-visible:shadow-[0_0_0_3px_var(--color-focus)] focus-visible:outline-none ${
+      className={`flex cursor-pointer flex-col gap-2.5 rounded-2xl border border-paper-200 bg-surface p-3.5 shadow-card transition-[box-shadow,transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-paper-300 hover:shadow-card-hover focus-visible:shadow-[0_0_0_3px_var(--color-focus)] focus-visible:outline-none ${
         closed ? 'opacity-[.72]' : ''
       }`}
     >

@@ -150,7 +150,7 @@ export default function ScheduleDialog({ init, onClose }: { init: ScheduleInit; 
               aria-checked={on}
               onClick={() => pickType(t)}
               className={`flex flex-col items-start gap-2.5 rounded-[14px] border-[1.5px] p-3 text-left transition-all hover:border-ink-300 ${
-                on ? 'border-blue-600 bg-blue-50 shadow-[0_0_0_3px_rgb(35_70_217/0.12)]' : 'border-paper-200 bg-white'
+                on ? 'border-blue-600 bg-blue-50 shadow-[0_0_0_3px_rgb(35_70_217/0.12)]' : 'border-paper-200 bg-surface'
               }`}
             >
               <span className={`flex size-[30px] items-center justify-center rounded-[9px] ${tone}`}>
@@ -203,7 +203,7 @@ export default function ScheduleDialog({ init, onClose }: { init: ScheduleInit; 
 
       {d.type === 'interview' && (
         <div className="flex flex-col gap-3 rounded-[14px] bg-paper-100 p-3.5">
-          <Tabs variant="pill" value={d.format} onChange={(v) => set('format', v)} items={FORMATS} className="bg-white" />
+          <Tabs variant="pill" value={d.format} onChange={(v) => set('format', v)} items={FORMATS} className="bg-surface" />
           <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
             <Input
               id="sch-where"

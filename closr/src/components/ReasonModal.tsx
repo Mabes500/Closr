@@ -29,7 +29,7 @@ export default function ReasonModal({
         aria-modal="true"
         aria-labelledby="reason-title"
         onClick={(e) => e.stopPropagation()}
-        className="flex w-full max-w-[480px] flex-col gap-[18px] rounded-[28px] bg-white p-7 shadow-dialog"
+        className="flex w-full max-w-[480px] flex-col gap-[18px] rounded-[28px] bg-surface p-7 shadow-dialog"
       >
         <div className="flex items-start gap-3">
           <div className="flex flex-1 flex-col gap-1.5">
@@ -55,7 +55,7 @@ export default function ReasonModal({
               type="button"
               autoFocus={i === 0}
               onClick={() => onPick(r)}
-              className="inline-flex h-10 items-center justify-center rounded-xl border-[1.5px] border-paper-300 bg-white px-[18px] text-[15px] font-semibold text-ink transition-[background,border-color,transform] hover:border-ink-300 hover:bg-paper-50 focus-visible:shadow-[0_0_0_3px_var(--color-focus)] focus-visible:outline-none active:scale-[.97]"
+              className="inline-flex h-10 items-center justify-center rounded-xl border-[1.5px] border-paper-300 bg-surface px-[18px] text-[15px] font-semibold text-ink transition-[background,border-color,transform] hover:border-ink-300 hover:bg-paper-50 focus-visible:shadow-[0_0_0_3px_var(--color-focus)] focus-visible:outline-none active:scale-[.97]"
             >
               {CLOSE_REASON_LABEL[r]}
             </button>

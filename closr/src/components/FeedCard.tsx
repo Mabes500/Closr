@@ -67,7 +67,7 @@ export default function FeedCard({ m, app }: { m: MatchWithPosting; app: Applica
             type="button"
             aria-pressed={m.dismiss_reason === r}
             onClick={() => update.mutate({ id: m.id, dismiss_reason: m.dismiss_reason === r ? null : r })}
-            className={`h-7 rounded-full border-[1.5px] px-2.5 text-xs font-medium ${m.dismiss_reason === r ? 'border-oxford-900 bg-oxford-900 text-white' : 'border-paper-300 bg-white text-ink-700 hover:border-ink-300'}`}
+            className={`h-7 rounded-full border-[1.5px] px-2.5 text-xs font-medium ${m.dismiss_reason === r ? 'border-action bg-action text-on-action' : 'border-paper-300 bg-surface text-ink-700 hover:border-ink-300'}`}
           >
             {r}
           </button>

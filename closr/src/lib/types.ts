@@ -190,6 +190,27 @@ export type ReminderFields = Pick<Reminder, 'type' | 'title' | 'due_at'> &
 // In-app notifications (roadmap 3.3, prototype NOTIF_KIND). Created by the app from reminders.
 export type NotificationKind = 'interview' | 'overdue' | 'deadline' | 'checkin' | 'streak' | 'matches'
 
+// Notification choices in Settings, per type (prototype NOTIF_PREFS).
+export const NOTIFICATION_PREFS = [
+  { id: 'followup', label: 'Follow-up nudges', sub: "When an application's been quiet for 7 days" },
+  { id: 'interview', label: 'Interview reminders', sub: 'Before every interview you schedule' },
+  { id: 'reminders', label: 'Your reminders', sub: 'Deadlines and reminders you set yourself' },
+  { id: 'checkin', label: 'Weekly check-in', sub: 'A five-minute look back, on the day you choose' },
+  { id: 'matches', label: 'New matching jobs', sub: 'A short digest, at most twice a week' },
+  { id: 'recap', label: 'Streaks and monthly recap', sub: 'Milestones and your month in numbers' },
+] as const
+export type NotificationPrefKey = (typeof NOTIFICATION_PREFS)[number]['id']
+
+// Which choice controls each kind of bell notification.
+export const PREF_FOR_KIND: Record<NotificationKind, NotificationPrefKey> = {
+  overdue: 'followup',
+  interview: 'interview',
+  deadline: 'reminders',
+  checkin: 'checkin',
+  matches: 'matches',
+  streak: 'recap',
+}
+
 export interface AppNotification {
   id: string
   user_id: string
@@ -257,6 +278,14 @@ export interface Profile {
   needs_visa_sponsorship: boolean | null
   // ISO 3166 codes, e.g. ['GB', 'DE'].
   work_countries: string[]
+  // Settings (roadmap 7.1). The email choices and timing are used from 7.2.
+  theme: 'light' | 'dark' | 'system'
+  notification_prefs: Record<NotificationPrefKey, { app: boolean; email: boolean }>
+  quiet_hours: boolean
+  quiet_from: string
+  quiet_to: string
+  checkin_day: string
+  checkin_time: string
   created_at: string
   updated_at: string
 }

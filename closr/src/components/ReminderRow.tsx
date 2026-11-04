@@ -43,7 +43,7 @@ export default function ReminderRow({
         checked={r.done}
         onChange={() => save.mutate({ id: r.id, ...doneFields(!r.done) })}
         aria-label={`Mark done: ${r.title}`}
-        className="mt-2 size-[18px] shrink-0 cursor-pointer accent-oxford-900"
+        className="mt-2 size-[18px] shrink-0 cursor-pointer accent-action"
       />
       <span className={`flex size-9 shrink-0 items-center justify-center rounded-[10px] ${late ? 'bg-coral-100 text-coral-700' : tone}`}>
         <Icon size={17} />

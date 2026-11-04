@@ -16,7 +16,7 @@ import Checkins from './pages/Checkins'
 import Goals from './pages/Goals'
 import Jobs from './pages/Jobs'
 import Posting from './pages/Posting'
-import ComingSoon from './pages/ComingSoon'
+import Settings from './pages/Settings'
 import Onboarding from './pages/Onboarding'
 import Profile from './pages/Profile'
 import Import from './pages/Import'
@@ -96,7 +96,7 @@ export default function App() {
               <Route path="cv" element={<CvVersions />} />
               <Route path="import" element={<Import />} />
               <Route path="profile" element={<Profile />} />
-              <Route path="settings" element={<ComingSoon screen="settings" />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

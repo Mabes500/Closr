@@ -34,7 +34,7 @@ export function TextField({ id, label, icon: Icon, error, hint, trailing, ...inp
         {label}
       </label>
       <div
-        className={`flex min-h-10 items-center gap-2 rounded-xl border-[1.5px] bg-white px-3 text-ink-400 transition-[border-color,box-shadow] focus-within:border-blue-500 focus-within:shadow-[0_0_0_3px_var(--color-focus)] ${
+        className={`flex min-h-10 items-center gap-2 rounded-xl border-[1.5px] bg-surface px-3 text-ink-400 transition-[border-color,box-shadow] focus-within:border-blue-500 focus-within:shadow-[0_0_0_3px_var(--color-focus)] ${
           error ? 'border-coral-400' : 'border-paper-300 hover:border-ink-300'
         }`}
       >
@@ -114,7 +114,7 @@ const btnBase =
 
 export function PrimaryButton({ children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button className={`${btnBase} border-transparent bg-oxford-900 text-white hover:enabled:bg-oxford-800`} {...rest}>
+    <button className={`${btnBase} border-transparent bg-action text-on-action hover:enabled:bg-action-hover`} {...rest}>
       {children}
     </button>
   )
@@ -124,7 +124,7 @@ export function SecondaryButton({ children, ...rest }: ButtonHTMLAttributes<HTML
   return (
     <button
       type="button"
-      className={`${btnBase} border-paper-300 bg-white text-ink hover:enabled:border-ink-300 hover:enabled:bg-paper-50`}
+      className={`${btnBase} border-paper-300 bg-surface text-ink hover:enabled:border-ink-300 hover:enabled:bg-paper-50`}
       {...rest}
     >
       {children}
@@ -169,7 +169,7 @@ export function Checkbox({
   return (
     <label htmlFor={id} className="group inline-flex cursor-pointer select-none items-start gap-2.5 text-[15px] leading-[1.4] text-ink">
       <input id={id} type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
-      <span className="mt-px flex size-5 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink-300 bg-white text-white transition-all group-hover:border-ink-500 peer-checked:scale-[1.06] peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-focus-visible:shadow-[0_0_0_3px_var(--color-focus)]">
+      <span className="mt-px flex size-5 shrink-0 items-center justify-center rounded-md border-[1.5px] border-ink-300 bg-surface text-surface transition-all group-hover:border-ink-500 peer-checked:scale-[1.06] peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-focus-visible:shadow-[0_0_0_3px_var(--color-focus)]">
         <Check size={14} strokeWidth={3} />
       </span>
       <span>{children}</span>

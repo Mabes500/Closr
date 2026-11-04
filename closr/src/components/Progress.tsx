@@ -38,7 +38,7 @@ export function ProgressRing({
       </svg>
       {pct > 0 && (
         <span
-          className="absolute rounded-full bg-gold-500 shadow-[0_0_0_2px_white]"
+          className="absolute rounded-full bg-gold-500 shadow-[0_0_0_2px_var(--color-surface)]"
           style={{ left: tipX - stroke * 0.75, top: tipY - stroke * 0.75, width: stroke * 1.5, height: stroke * 1.5 }}
         />
       )}

@@ -54,7 +54,7 @@ export default function Jobs() {
         <span className="mr-1 text-[11px] font-semibold uppercase tracking-[.06em] text-ink-500">Matching on</span>
         {chips.length ? (
           chips.map((c) => (
-            <Badge key={c} className="bg-oxford-50 text-oxford-900">
+            <Badge key={c} className="bg-oxford-50 text-brand-ink">
               {c}
             </Badge>
           ))

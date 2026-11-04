@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Check, Loader, MapPin, Wallet } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
+import AutosaveInput from '../components/AutosaveInput'
 import RolePicker from '../components/RolePicker'
 import { Avatar, Input, RoleChip, Select, Switch, ToggleChip } from '../components/ui'
 import { COUNTRIES, countryName } from '../lib/countries'
@@ -19,7 +20,7 @@ const FLOOR_CURRENCIES = ['EUR', 'USD', 'GBP', 'CAD', 'AUD'].map((c) => ({ value
 const SETUPS: WorkMode[] = ['remote', 'hybrid', 'onsite']
 
 const cardShape = 'flex flex-col rounded-2xl p-6 shadow-card'
-const card = `${cardShape} border border-paper-200 bg-white`
+const card = `${cardShape} border border-paper-200 bg-surface`
 const h2 = 'text-lg font-semibold leading-[1.3] tracking-[-0.02em] text-ink'
 const sub = 'text-sm leading-[1.45] text-ink-500'
 
@@ -93,7 +94,7 @@ export default function Profile() {
                     aria-pressed={on}
                     onClick={() => save({ search_stage: id })}
                     className={`flex items-center gap-2.5 rounded-xl border-[1.5px] p-3 text-left text-sm leading-[1.25] text-ink transition-[border-color,background,transform] active:scale-[.97] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_var(--color-focus)] ${
-                      on ? 'border-blue-600 bg-blue-50 font-semibold' : 'border-paper-200 bg-white font-medium hover:border-ink-300'
+                      on ? 'border-blue-600 bg-blue-50 font-semibold' : 'border-paper-200 bg-surface font-medium hover:border-ink-300'
                     }`}
                   >
                     <Icon size={17} className={on ? 'text-blue-600' : 'text-ink-500'} />
@@ -140,7 +141,7 @@ export default function Profile() {
                   value=""
                   onChange={(e) => e.target.value && save({ work_countries: [...profile.work_countries, e.target.value] })}
                   aria-label="Add a country you can work in"
-                  className="h-[34px] cursor-pointer rounded-full border-[1.5px] border-paper-300 bg-white px-3 text-sm text-ink-500 outline-none hover:border-ink-300 focus:border-blue-500"
+                  className="h-[34px] cursor-pointer rounded-full border-[1.5px] border-paper-300 bg-surface px-3 text-sm text-ink-500 outline-none hover:border-ink-300 focus:border-blue-500"
                 >
                   <option value="">+ Add a country</option>
                   {COUNTRIES.filter((c) => !profile.work_countries.includes(c.code)).map((c) => (
@@ -234,7 +235,7 @@ export default function Profile() {
                     aria-pressed={on}
                     onClick={() => save({ weekly_pace: id })}
                     className={`h-10 rounded-[10px] text-sm font-semibold leading-none transition-[background,transform] active:scale-[.97] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_var(--color-focus)] ${
-                      on ? 'bg-gold-500 text-ink' : 'text-white/80 hover:bg-white/[.06]'
+                      on ? 'bg-gold-500 text-on-spark' : 'text-white/80 hover:bg-white/[.06]'
                     }`}
                   >
                     {label}
@@ -267,8 +268,8 @@ export default function Profile() {
             <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
               {/* Starts from the same name as the header (saved name, else the one from Google sign-in). */}
               <AutosaveInput id="pf-name" label="Name" saved={displayName} onSave={(v) => save({ full_name: v.trim() || null })} />
-              {/* Changing email needs a confirmation flow; that comes with Settings (7.1). */}
-              <Input id="pf-email" label="Email" type="email" value={session?.user.email ?? ''} readOnly className="text-ink-500" />
+              {/* Changing email needs a confirmation link, so it lives in Settings. */}
+              <Input id="pf-email" label="Email" type="email" value={session?.user.email ?? ''} readOnly className="text-ink-500" hint="Change it in Settings" />
             </div>
           </section>
         </div>
@@ -283,39 +284,5 @@ function Heading({ title, sub: text }: { title: string; sub: ReactNode }) {
       <h2 className={h2}>{title}</h2>
       <p className={sub}>{text}</p>
     </div>
-  )
-}
-
-// Text box that saves 600ms after typing stops, on leaving the box, and (if an edit is
-// still waiting) when the page is left.
-function AutosaveInput({
-  saved,
-  onSave,
-  ...rest
-}: Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange' | 'onBlur'> & { saved: string; onSave: (v: string) => void }) {
-  const [value, setValue] = useState(saved)
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const last = useRef(saved)
-  const latest = useRef({ value: saved, onSave })
-  latest.current = { value, onSave }
-  const flush = () => {
-    clearTimeout(timer.current)
-    const { value: v, onSave: save } = latest.current
-    if (v === last.current) return
-    last.current = v
-    save(v)
-  }
-  useEffect(() => flush, [])
-  return (
-    <Input
-      {...rest}
-      value={value}
-      onChange={(e) => {
-        setValue(e.target.value)
-        clearTimeout(timer.current)
-        timer.current = setTimeout(flush, 600)
-      }}
-      onBlur={flush}
-    />
   )
 }

@@ -9,8 +9,10 @@ import {
   LayoutGrid,
   LogOut,
   Menu as MenuIcon,
+  Moon,
   Settings,
   Sparkles,
+  Sun,
   Target,
   Upload,
   User,
@@ -35,7 +37,8 @@ import { browserTimeZone, useWeekProgress } from '../lib/goals'
 import { useProfile, useUpdateProfile } from '../lib/profile'
 import { useReminders } from '../lib/reminders'
 import { supabase } from '../lib/supabase'
-import type { AppNotification } from '../lib/types'
+import { applyTheme, effectiveTheme, storedTheme } from '../lib/theme'
+import { PREF_FOR_KIND, type AppNotification } from '../lib/types'
 import { Checkbox } from './auth/fields'
 import { Logo } from './Logo'
 import NotificationPanel from './NotificationPanel'
@@ -45,7 +48,7 @@ import { Avatar, Button, Dialog, IconButton } from './ui'
 // App shell from docs/prototype.html (AppShell, Sidebar, NAV): fixed sidebar on wide
 // screens; below 861px a top bar with a menu button that slides the sidebar in.
 // The notification bell sits in the sidebar header and the mobile top bar; the streak
-// card above the user menu. Left out until it exists: dark-mode toggle (7.1).
+// card above the user menu, with the dark-mode toggle beside the user button.
 
 export const NAV: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/', label: 'Board', icon: LayoutGrid },
@@ -86,6 +89,11 @@ export default function AppShell() {
     // Runs only when the saved zone changes (updateProfile is a new object every render).
   }, [profile?.time_zone, tz])
 
+  // The account's appearance choice follows it to this device.
+  useEffect(() => {
+    if (profile?.theme) applyTheme(profile.theme)
+  }, [profile?.theme])
+
   // Notifications are created here, when the app loads and whenever reminders, check-ins or the streak change.
   const { data: reminders } = useReminders()
   const checkins = useCheckins()
@@ -100,7 +108,8 @@ export default function AppShell() {
           ...checkinNotifications(checkins),
           ...streakNotifications(progress.streak, progress.startedOn),
           ...matchNotifications(matchDay, newMatches, progress.today),
-        ]
+          // Types turned off under Settings → Notifications → In Closr.
+        ].filter((n) => profile?.notification_prefs?.[PREF_FOR_KIND[n.kind]]?.app !== false)
       : null,
   )
   const { data: notifs = [] } = useNotifications()
@@ -141,7 +150,7 @@ export default function AppShell() {
     <div className="flex min-h-screen bg-paper-50">
       {!narrow && sidebar}
       {narrow && (
-        <header className="fixed inset-x-0 top-0 z-[80] flex h-[calc(60px+env(safe-area-inset-top))] items-center gap-1.5 border-b border-paper-200 bg-white pl-[max(10px,env(safe-area-inset-left))] pr-[max(10px,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)]">
+        <header className="fixed inset-x-0 top-0 z-[80] flex h-[calc(60px+env(safe-area-inset-top))] items-center gap-1.5 border-b border-paper-200 bg-surface pl-[max(10px,env(safe-area-inset-left))] pr-[max(10px,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)]">
           <IconButton icon={MenuIcon} label="Open menu" onClick={() => setSide(true)} />
           <span className="flex-1">
             <Logo size={24} />
@@ -181,7 +190,7 @@ function BellButton({ unread, onClick }: { unread: number; onClick: () => void }
     <span className="relative">
       <IconButton icon={Bell} label={unread ? `${unread} unread notifications` : 'Notifications'} onClick={onClick} />
       {unread > 0 && (
-        <span className="pointer-events-none absolute right-px top-0.5 h-[17px] min-w-[17px] rounded-full bg-coral-600 px-[5px] text-center text-[10px] font-bold leading-[17px] text-white shadow-[0_0_0_2px_white]">
+        <span className="pointer-events-none absolute right-px top-0.5 h-[17px] min-w-[17px] rounded-full bg-coral-600 px-[5px] text-center text-[10px] font-bold leading-[17px] text-on-action shadow-[0_0_0_2px_var(--color-surface)]">
           {unread}
         </span>
       )}
@@ -211,7 +220,9 @@ function Sidebar({
   const navigate = useNavigate()
   const { data: apps = [] } = useApplications()
   const { data: profile } = useProfile()
+  const updateProfile = useUpdateProfile()
   const [menu, setMenu] = useState(false)
+  const dark = effectiveTheme(profile?.theme ?? storedTheme()) === 'dark'
 
   const meta = session?.user.user_metadata ?? {}
   const email = session?.user.email ?? ''
@@ -222,7 +233,7 @@ function Sidebar({
   const inAccount = pathname === '/profile' || pathname === '/settings'
 
   return (
-    <aside className="sticky top-0 flex h-screen w-[248px] shrink-0 flex-col gap-6 overflow-y-auto border-r border-paper-200 bg-white px-3.5 py-[22px]">
+    <aside className="sticky top-0 flex h-screen w-[248px] shrink-0 flex-col gap-6 overflow-y-auto border-r border-paper-200 bg-surface px-3.5 py-[22px]">
       <div className="flex items-center gap-1 pl-2">
         <span className="flex-1">
           <Logo size={28} />
@@ -242,7 +253,7 @@ function Sidebar({
               to={to}
               aria-current={on ? 'page' : undefined}
               className={`flex h-10 items-center gap-3 rounded-[10px] px-3 text-sm leading-none transition-colors ${
-                on ? 'bg-oxford-50 font-semibold text-oxford-900' : 'font-medium text-ink-700 hover:bg-paper-100'
+                on ? 'bg-oxford-50 font-semibold text-brand-ink' : 'font-medium text-ink-700 hover:bg-paper-100'
               }`}
             >
               <Icon size={18} className={on ? 'text-blue-600' : 'text-ink-500'} />
@@ -292,6 +303,16 @@ function Sidebar({
           </div>
           <ChevronsUpDown size={15} className="text-ink-400" />
         </button>
+        <IconButton
+          icon={dark ? Sun : Moon}
+          label={dark ? 'Light mode' : 'Dark mode'}
+          className="size-8"
+          onClick={() => {
+            const next = dark ? 'light' : 'dark'
+            applyTheme(next)
+            updateProfile.mutate({ theme: next })
+          }}
+        />
         {menu && (
           <Menu onClose={() => setMenu(false)}>
             <div className="flex flex-col gap-0.5 px-2.5 pb-1.5 pt-2">
@@ -323,7 +344,7 @@ function Menu({ onClose, children }: { onClose: () => void; children: ReactNode 
       <div
         role="menu"
         onClick={onClose}
-        className="absolute inset-x-0 bottom-14 z-[150] flex min-w-[210px] flex-col rounded-[14px] border border-paper-200 bg-white p-1.5 shadow-dialog"
+        className="absolute inset-x-0 bottom-14 z-[150] flex min-w-[210px] flex-col rounded-[14px] border border-paper-200 bg-surface p-1.5 shadow-dialog"
       >
         {children}
       </div>

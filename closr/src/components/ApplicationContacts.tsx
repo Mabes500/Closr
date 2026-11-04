@@ -75,7 +75,7 @@ export default function ApplicationContacts({ app, onFollowUp }: { app: Applicat
           value=""
           onChange={(e) => e.target.value && link.mutate({ application_id: app.id, contact_id: e.target.value })}
           aria-label="Link an existing contact"
-          className="mt-2 h-8 w-full cursor-pointer rounded-lg border-[1.5px] border-paper-300 bg-white px-2.5 text-[13px] text-ink-500 outline-none hover:border-ink-300 focus:border-blue-500"
+          className="mt-2 h-8 w-full cursor-pointer rounded-lg border-[1.5px] border-paper-300 bg-surface px-2.5 text-[13px] text-ink-500 outline-none hover:border-ink-300 focus:border-blue-500"
         >
           <option value="">Or link someone you've already added…</option>
           {others.map((c) => (

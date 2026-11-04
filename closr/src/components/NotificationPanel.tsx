@@ -97,7 +97,7 @@ export default function NotificationPanel({
       <section
         role="dialog"
         aria-label="Notifications"
-        className={`fixed z-[170] flex max-h-[min(640px,calc(100vh-32px))] flex-col overflow-hidden rounded-[20px] border border-paper-200 bg-white shadow-dialog ${
+        className={`fixed z-[170] flex max-h-[min(640px,calc(100vh-32px))] flex-col overflow-hidden rounded-[20px] border border-paper-200 bg-surface shadow-dialog ${
           narrow ? 'inset-x-2 top-[calc(64px+env(safe-area-inset-top))]' : 'left-[242px] top-4 w-[400px]'
         }`}
       >

@@ -72,7 +72,7 @@ The plan is in [docs/JOBS-FEED-PLAN.md](JOBS-FEED-PLAN.md): sources and what's e
 - [x] **6.2d Jobs UI.** Jobs screen (today's matches, filters, empty states), posting page, save to board, "Not for me", closed state, bell notification. Also "I applied" (as in the prototype), optional "Not for me" reasons with Undo, earlier unseen matches, and the new-match count in the sidebar.
 
 ## Phase 7: Settings and launch
-- [ ] **7.1 Settings.** Name and email change, password change, Google connect/disconnect, appearance (light default, dark, match device), sessions and sign out other devices, export data (CSV), delete account. Includes the dark-mode toggle in Sidebar (deferred from 0.4).
+- [x] **7.1 Settings.** Name and email change, password change, Google connect/disconnect, appearance (light default, dark, match device), sessions and sign out other devices, export data (CSV), delete account. Includes the dark-mode toggle in Sidebar (deferred from 0.4, done). Notification choices are saved; email delivery comes with 7.2. Other devices can't be listed from the browser, so only this device and the sign-out buttons show.
 - [ ] **7.2 Email notifications.** Via Resend: weekly check-in, interview reminders, quiet hours, per-type toggles.
 - [ ] **7.3 Launch checks.** Landing page matches the product, privacy policy and terms, error tracking, basic analytics.
 

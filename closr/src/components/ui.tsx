@@ -11,18 +11,19 @@ export const focusRing = 'focus-visible:outline-none focus-visible:shadow-[0_0_0
 // Buttons
 // ---------------------------------------------------------------------------
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'spark'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'spark' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   icon?: LucideIcon
   iconRight?: LucideIcon
 }
 
 const BUTTON_VARIANT = {
-  primary: 'border-transparent bg-oxford-900 text-white hover:enabled:bg-oxford-800',
-  secondary: 'border-paper-300 bg-white text-ink hover:enabled:border-ink-300 hover:enabled:bg-paper-50',
+  danger: 'border-transparent bg-coral-600 text-on-action hover:enabled:bg-coral-700',
+  primary: 'border-transparent bg-action text-on-action hover:enabled:bg-action-hover',
+  secondary: 'border-paper-300 bg-surface text-ink hover:enabled:border-ink-300 hover:enabled:bg-paper-50',
   ghost: 'border-transparent bg-transparent text-ink-700 hover:enabled:bg-paper-100 hover:enabled:text-ink',
   spark:
-    'border-transparent bg-gold-500 text-ink shadow-[0_3px_0_var(--color-oxford-900)] hover:enabled:-translate-y-px hover:enabled:bg-gold-400',
+    'border-transparent bg-gold-500 text-on-spark shadow-[0_3px_0_var(--color-oxford-900)] hover:enabled:-translate-y-px hover:enabled:bg-gold-400',
 }
 
 const BUTTON_SIZE = {
@@ -64,7 +65,7 @@ export function IconButton({ icon: Icon, label, onClick, className = '' }: { ico
 // Form controls
 // ---------------------------------------------------------------------------
 const ctl = (size: 'sm' | 'md') =>
-  `flex items-center gap-2 border-[1.5px] border-paper-300 bg-white px-3 text-ink-400 transition-[border-color,box-shadow] hover:border-ink-300 focus-within:border-blue-500 focus-within:shadow-[0_0_0_3px_var(--color-focus)] ${
+  `flex items-center gap-2 border-[1.5px] border-paper-300 bg-surface px-3 text-ink-400 transition-[border-color,box-shadow] hover:border-ink-300 focus-within:border-blue-500 focus-within:shadow-[0_0_0_3px_var(--color-focus)] ${
     size === 'sm' ? 'min-h-8 rounded-lg' : 'min-h-10 rounded-xl'
   }`
 const ctlInput = 'min-w-0 flex-1 border-0 bg-transparent p-0 text-[15px] leading-[1.4] text-ink outline-none placeholder:text-ink-400'
@@ -198,7 +199,7 @@ export function Tabs<T extends string>({
         const look =
           variant === 'line'
             ? `-mb-px border-b-[2.5px] py-3 ${selected ? 'border-blue-600 text-ink' : 'border-transparent'}`
-            : `h-8 justify-center rounded-[9px] px-3.5 ${selected ? 'bg-white text-ink shadow-[0_1px_2px_rgb(0_33_71/0.08)]' : ''}`
+            : `h-8 justify-center rounded-[9px] px-3.5 ${selected ? 'bg-surface text-ink shadow-[0_1px_2px_rgb(0_33_71/0.08)]' : ''}`
         return (
           <button
             key={it.value}
@@ -252,7 +253,7 @@ export function Dialog({
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: width }}
-        className="flex max-h-full w-full flex-col gap-[18px] overflow-y-auto rounded-[28px] bg-white p-7 shadow-dialog"
+        className="flex max-h-full w-full flex-col gap-[18px] overflow-y-auto rounded-[28px] bg-surface p-7 shadow-dialog"
       >
         <div className="flex items-start gap-3">
           <div className="flex flex-1 flex-col gap-1.5">
@@ -291,7 +292,7 @@ export function Drawer({
         role="dialog"
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
-        className="flex h-full w-full max-w-[480px] flex-col overflow-hidden rounded-l-[22px] bg-white shadow-dialog"
+        className="flex h-full w-full max-w-[480px] flex-col overflow-hidden rounded-l-[22px] bg-surface shadow-dialog"
       >
         <div className="flex items-start gap-3.5 border-b border-paper-200 px-6 pb-[18px] pt-[22px]">
           {leading}
@@ -375,7 +376,7 @@ export function Menu({ open, onClose, head, items }: { open: boolean; onClose: (
   }, [open, onClose])
   if (!open) return null
   return (
-    <div ref={ref} role="menu" className="absolute right-0 top-[38px] z-50 flex min-w-[200px] flex-col rounded-[14px] border border-paper-200 bg-white p-1.5 shadow-dialog">
+    <div ref={ref} role="menu" className="absolute right-0 top-[38px] z-50 flex min-w-[200px] flex-col rounded-[14px] border border-paper-200 bg-surface p-1.5 shadow-dialog">
       {head && <span className="px-2.5 pb-1 pt-1.5 text-[11px] font-semibold uppercase tracking-[.06em] text-ink-500">{head}</span>}
       {items.map((it, i) => {
         if (it === '-') return <span key={i} className="my-1 h-px bg-paper-200" />
@@ -417,7 +418,7 @@ export function TopBar({ title, sub, children }: { title: string; sub?: ReactNod
 }
 
 export function Card({ children, sunken, className = '' }: { children: ReactNode; sunken?: boolean; className?: string }) {
-  const look = sunken ? 'border-transparent bg-paper-100' : 'border-paper-200 bg-white'
+  const look = sunken ? 'border-transparent bg-paper-100' : 'border-paper-200 bg-surface'
   return <div className={`rounded-2xl border ${look} ${className}`}>{children}</div>
 }
 
@@ -469,8 +470,8 @@ export function Badge({ className = 'bg-paper-200 text-ink-700', dot, children }
 // Role chips (prototype `RoleChip` / `SuggestChip`): a chosen role removes itself on
 // click; a suggestion adds itself. Also used for on/off toggles (`ob-chip`).
 const chip = `flex h-[34px] items-center gap-1.5 rounded-full border-[1.5px] text-sm font-medium leading-none transition-[border-color,background,transform] active:scale-[.96] ${focusRing}`
-const chipOn = 'border-oxford-900 bg-oxford-900 pl-3.5 pr-2.5 text-white hover:border-oxford-800 hover:bg-oxford-800'
-const chipOff = 'border-paper-300 bg-white pl-2.5 pr-3.5 text-ink hover:border-ink-300'
+const chipOn = 'border-action bg-action pl-3.5 pr-2.5 text-on-action hover:border-action-hover hover:bg-action-hover'
+const chipOff = 'border-paper-300 bg-surface pl-2.5 pr-3.5 text-ink hover:border-ink-300'
 
 export function RoleChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
@@ -515,8 +516,8 @@ export function FilterChip({ selected, onClick, children }: { selected: boolean;
       onClick={onClick}
       className={`inline-flex h-[30px] items-center whitespace-nowrap rounded-full border-[1.5px] px-3 text-[13px] font-medium leading-none transition-all active:scale-[.96] ${focusRing} ${
         selected
-          ? 'border-oxford-900 bg-oxford-900 text-white hover:border-oxford-800 hover:bg-oxford-800'
-          : 'border-paper-300 bg-white text-ink-700 hover:border-ink-300 hover:text-ink'
+          ? 'border-action bg-action text-on-action hover:border-action-hover hover:bg-action-hover'
+          : 'border-paper-300 bg-surface text-ink-700 hover:border-ink-300 hover:text-ink'
       }`}
     >
       {children}
@@ -550,7 +551,7 @@ export function CompanyTile({ name, size = 32 }: { name: string; size?: number }
   return (
     <div
       style={{ width: size, height: size, borderRadius: Math.round(size * 0.28), fontSize: Math.round(size * 0.44) }}
-      className={`flex shrink-0 items-center justify-center font-semibold leading-none text-white ${TILE_COLORS[hash % TILE_COLORS.length]}`}
+      className={`flex shrink-0 items-center justify-center font-semibold leading-none text-on-action ${TILE_COLORS[hash % TILE_COLORS.length]}`}
     >
       {name.trim()[0]?.toUpperCase() ?? '?'}
     </div>

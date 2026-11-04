@@ -148,7 +148,7 @@ function PeopleLikeYou() {
           </p>
           <div className="flex gap-[18px] text-xs font-medium text-ink-500">
             <span className="flex items-center gap-1.5">
-              <i className="size-2.5 rounded-[3px] bg-oxford-900" />
+              <i className="size-2.5 rounded-[3px] bg-action" />
               Their {measure}
             </span>
             {mineTotal > 0 && (
@@ -167,7 +167,7 @@ function PeopleLikeYou() {
               >
                 <span className="text-ink-700">{r.label}</span>
                 <div className="flex flex-col gap-[3px]">
-                  <span className="h-2 rounded-full bg-oxford-900" style={{ width: `${Math.max(1, (r.them / top) * 100)}%` }} />
+                  <span className="h-2 rounded-full bg-action" style={{ width: `${Math.max(1, (r.them / top) * 100)}%` }} />
                   {mineTotal > 0 && <span className="h-2 rounded-full bg-gold-500" style={{ width: `${Math.max(1, (r.you / top) * 100)}%` }} />}
                 </div>
                 <span className="text-right font-mono text-ink">{r.them}%</span>
@@ -264,7 +264,7 @@ function Plan({ week, target, applied }: { week: string; target: number; applied
                 disabled={s.auto}
                 onChange={() => toggle.mutate({ step: s.id, done: !d })}
                 aria-label={`Mark done: ${s.title}`}
-                className="mt-0.5 size-[18px] shrink-0 cursor-pointer accent-oxford-900 disabled:cursor-default"
+                className="mt-0.5 size-[18px] shrink-0 cursor-pointer accent-action disabled:cursor-default"
               />
               <div className={`flex min-w-0 flex-[1_1_220px] flex-col gap-[3px] ${d ? 'opacity-55' : ''}`}>
                 <b className={`text-[15px] font-semibold leading-[1.35] text-ink ${d ? 'line-through' : ''}`}>{s.title}</b>
@@ -296,7 +296,7 @@ function WeeksChart({ weeks, target }: { weeks: { start: string; count: number }
       <div className="relative" style={{ height: H }}>
         {/* Target line */}
         <div className="pointer-events-none absolute inset-x-0 border-t-[1.5px] border-dashed border-ink-300" style={{ bottom: (target / max) * H }}>
-          <span className="absolute -top-[18px] right-0 bg-white pl-1 text-[11px] font-medium text-ink-500">Target {target}</span>
+          <span className="absolute -top-[18px] right-0 bg-surface pl-1 text-[11px] font-medium text-ink-500">Target {target}</span>
         </div>
         <div className="absolute inset-0 flex items-end gap-[2px] border-b border-paper-200">
           {weeks.map((w, i) => {

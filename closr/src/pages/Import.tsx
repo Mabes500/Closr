@@ -170,7 +170,7 @@ export default function Import() {
                 onFile(e.dataTransfer.files[0])
               }}
               className={`flex flex-col items-center gap-2.5 rounded-[20px] border-2 border-dashed px-6 py-11 text-center transition-colors ${
-                dragging ? 'border-blue-400 bg-blue-50' : 'border-paper-400 bg-white'
+                dragging ? 'border-blue-400 bg-blue-50' : 'border-paper-400 bg-surface'
               }`}
             >
               <div className="flex size-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
@@ -422,7 +422,7 @@ function Stepper({ step }: { step: number }) {
           <span className={`flex items-center gap-2 text-[13px] font-semibold ${i <= step ? 'text-ink' : 'text-ink-400'}`}>
             <span
               className={`flex size-6 items-center justify-center rounded-full text-xs font-semibold ${
-                i < step ? 'bg-mint-600 text-white' : i === step ? 'bg-oxford-900 text-white' : 'bg-paper-200 text-ink-500'
+                i < step ? 'bg-mint-600 text-on-action' : i === step ? 'bg-action text-on-action' : 'bg-paper-200 text-ink-500'
               }`}
             >
               {i < step ? <Check size={14} /> : i + 1}
@@ -443,7 +443,7 @@ const Code = ({ children }: { children: ReactNode }) => (
 // Prototype `MapTable`.
 function MapTable({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
   return (
-    <div className="overflow-x-auto rounded-[14px] border border-paper-200 bg-white">
+    <div className="overflow-x-auto rounded-[14px] border border-paper-200 bg-surface">
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr>

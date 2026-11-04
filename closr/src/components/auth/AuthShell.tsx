@@ -69,7 +69,7 @@ function AuthArt() {
             style={{ marginLeft: i * 18 }}
             className="flex items-center gap-3 rounded-[14px] border border-white/10 bg-white/[.07] px-3.5 py-3"
           >
-            <div className={`flex size-[34px] shrink-0 items-center justify-center rounded-[10px] text-[15px] font-semibold text-white ${r.color}`}>
+            <div className={`flex size-[34px] shrink-0 items-center justify-center rounded-[10px] text-[15px] font-semibold text-on-action ${r.color}`}>
               {r.company[0]}
             </div>
             <div className="min-w-0 flex-1">

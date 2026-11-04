@@ -71,7 +71,90 @@
   --color-mint-600: #1F9D6B;
   --color-mint-700: #137451;
   --color-focus: rgb(125 149 255 / 0.4);
+
+  /* Roles that change differently in dark mode (prototype --action-*, --text-brand...).
+     Light values match the palette above. */
+  --color-action: #002147;
+  --color-action-hover: #0E3360;
+  --color-on-action: #FFFFFF;
+  --color-brand-ink: #002147;
+  --color-on-spark: #131A2C;
+  --color-inverse: #131A2C;
 }
+
+/* Dark theme: the prototype's [data-theme="dark"] values on the same tokens. Set on <html>
+   by index.html (before first paint) and src/lib/theme.ts. oxford-900 stays a dark brand
+   surface here, so white text on brand panels keeps working. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-brand: #7D95FF;
+  --color-brand-hover: #93A8FF;
+  --color-brand-soft: #161C33;
+  --color-spark: #F2B632;
+  --color-spark-soft: #221C0C;
+  --color-ink: #E7EAF3;
+  --color-ink-muted: #97A0B4;
+  --color-ink-faint: #7A8398;
+  --color-canvas: #0D111B;
+  --color-surface: #151A27;
+  --color-line: #252C3E;
+  --color-line-strong: #4A5370;
+  --color-status-saved: #7A8398;
+  --color-status-applied: #7D95FF;
+  --color-status-interviewing: #F2B632;
+  --color-status-offer: #3DB57C;
+  --color-status-closed: #5A6378;
+  --color-status-rejected: #EF7B72;
+  --color-oxford-900: #17264A;
+  --color-oxford-800: #20335F;
+  --color-oxford-600: #8A9BB8;
+  --color-oxford-300: #4A5A7C;
+  --color-oxford-100: #1E2638;
+  --color-oxford-50: #182033;
+  --color-overlay: rgb(0 0 0 / 0.55);
+  --shadow-dialog: 0 4px 8px rgb(0 0 0 / 0.35), 0 18px 40px rgb(0 0 0 / 0.5);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px rgb(0 0 0 / 0.25);
+  --shadow-card-hover: 0 2px 4px rgb(0 0 0 / 0.3), 0 8px 20px rgb(0 0 0 / 0.35);
+  --color-paper-50: #0D111B;
+  --color-paper-100: #1C2232;
+  --color-paper-200: #293043;
+  --color-paper-300: #343C52;
+  --color-paper-400: #4A5370;
+  --color-ink-300: #5A6378;
+  --color-ink-400: #7A8398;
+  --color-ink-500: #97A0B4;
+  --color-ink-700: #B9C0D0;
+  --color-blue-50: #161C33;
+  --color-blue-100: #1E2752;
+  --color-blue-400: #7D95FF;
+  --color-blue-500: #6A84F5;
+  --color-blue-600: #7D95FF;
+  --color-blue-700: #A3B4FF;
+  --color-gold-100: #382D10;
+  --color-gold-400: #F5C55A;
+  --color-gold-500: #F2B632;
+  --color-gold-800: #F2B632;
+  --color-coral-100: #3A1E1D;
+  --color-coral-400: #EF7B72;
+  --color-coral-600: #E5675D;
+  --color-coral-700: #EF7B72;
+  --color-mint-100: #14332A;
+  --color-mint-600: #3DB57C;
+  --color-mint-700: #4CC48B;
+  --color-action: #7D95FF;
+  --color-action-hover: #93A8FF;
+  --color-on-action: #0D111B;
+  --color-brand-ink: #E7EAF3;
+  --color-inverse: #17264A;
+}
+
+/* The theme pictures in Settings always show their own theme's colours. */
+.theme-swatch-light { background: #FBF8F3; }
+.theme-swatch-light .theme-swatch-bar { background: #2346D9; }
+.theme-swatch-light .theme-swatch-dot { background: #E9A100; }
+.theme-swatch-dark { background: #0D111B; }
+.theme-swatch-dark .theme-swatch-bar { background: #7D95FF; }
+.theme-swatch-dark .theme-swatch-dot { background: #F2B632; }
 
 /* Onboarding step change (prototype `ob-in`). */
 @keyframes ob-in {

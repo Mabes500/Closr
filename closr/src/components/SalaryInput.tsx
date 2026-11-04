@@ -22,7 +22,7 @@ export function salaryValues(s: SalaryDraft) {
 }
 
 const box =
-  'h-8 rounded-lg border-[1.5px] border-paper-300 bg-white px-2 text-sm text-ink outline-none hover:border-ink-300 focus:border-blue-500 focus:shadow-[0_0_0_3px_var(--color-focus)]'
+  'h-8 rounded-lg border-[1.5px] border-paper-300 bg-surface px-2 text-sm text-ink outline-none hover:border-ink-300 focus:border-blue-500 focus:shadow-[0_0_0_3px_var(--color-focus)]'
 
 export default function SalaryInput({
   id,

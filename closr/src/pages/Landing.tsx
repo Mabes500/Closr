@@ -36,7 +36,7 @@ export default function Landing() {
           <Link to={signIn} className="font-medium text-ink-muted hover:text-ink">
             Sign in
           </Link>
-          <Link to={start} className="rounded-lg bg-brand px-4 py-2 font-medium text-white hover:bg-brand-hover">
+          <Link to={start} className="rounded-lg bg-brand px-4 py-2 font-medium text-on-action hover:bg-brand-hover">
             Get started free
           </Link>
         </div>
@@ -56,7 +56,7 @@ export default function Landing() {
           time closing offers.
         </p>
         <div className="mt-8 flex justify-center gap-3">
-          <Link to={start} className="rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-hover">
+          <Link to={start} className="rounded-lg bg-brand px-6 py-3 font-medium text-on-action hover:bg-brand-hover">
             Start tracking, it's free
           </Link>
         </div>
@@ -97,7 +97,7 @@ export default function Landing() {
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="rounded-2xl bg-ink px-8 py-12 text-center sm:px-16">
+        <div className="rounded-2xl bg-inverse px-8 py-12 text-center sm:px-16">
           <h2 className="text-3xl font-semibold tracking-tight text-white">Your next offer is in the pipeline.</h2>
           <p className="mx-auto mt-3 max-w-lg text-white/70">
             Set up your board in under a minute. Coming soon: goals with next-step recommendations based on what worked
@@ -105,7 +105,7 @@ export default function Landing() {
           </p>
           <Link
             to={start}
-            className="mt-8 inline-block rounded-lg bg-spark px-6 py-3 font-medium text-ink hover:brightness-95"
+            className="mt-8 inline-block rounded-lg bg-spark px-6 py-3 font-medium text-on-spark hover:brightness-95"
           >
             Get started free
           </Link>

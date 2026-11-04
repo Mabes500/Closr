@@ -212,10 +212,10 @@ function Options<T extends string>({
             aria-checked={on}
             onClick={() => onPick(id)}
             className={`flex w-full items-center gap-4 rounded-2xl border-[1.5px] py-3.5 pl-3.5 pr-[18px] text-left transition-[border-color,background,box-shadow,transform] hover:border-ink-300 active:scale-[.985] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_var(--color-focus)] ${
-              on ? 'border-blue-600 bg-blue-50 shadow-[0_0_0_3px_rgb(35_70_217/0.12)]' : 'border-paper-200 bg-white shadow-card'
+              on ? 'border-blue-600 bg-blue-50 shadow-[0_0_0_3px_rgb(35_70_217/0.12)]' : 'border-paper-200 bg-surface shadow-card'
             }`}
           >
-            <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors ${on ? 'bg-blue-600 text-white' : 'bg-paper-100 text-ink-700'}`}>
+            <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors ${on ? 'bg-blue-600 text-on-action' : 'bg-paper-100 text-ink-700'}`}>
               <Icon size={20} />
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
@@ -228,7 +228,7 @@ function Options<T extends string>({
             <span
               className={`flex size-[22px] shrink-0 items-center justify-center rounded-full border-[1.5px] transition-all ${on ? 'border-blue-600 bg-blue-600' : 'border-paper-300'}`}
             >
-              <span className={`size-2 rounded-full bg-white transition-transform ${on ? 'scale-100' : 'scale-0'}`} />
+              <span className={`size-2 rounded-full bg-surface transition-transform ${on ? 'scale-100' : 'scale-0'}`} />
             </span>
           </button>
         )

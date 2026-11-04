@@ -100,13 +100,13 @@ export default function Schedule() {
                     aria-pressed={on}
                     onClick={() => setDay(on ? null : i)}
                     className={`flex flex-col items-center gap-2 rounded-xl border-[1.5px] px-1 py-2.5 transition-colors ${
-                      on ? 'border-oxford-900 bg-oxford-900' : i === 0 ? 'border-blue-400 bg-white hover:bg-paper-50' : 'border-paper-200 bg-white hover:bg-paper-50'
+                      on ? 'border-action bg-action' : i === 0 ? 'border-blue-400 bg-surface hover:bg-paper-50' : 'border-paper-200 bg-surface hover:bg-paper-50'
                     }`}
                   >
-                    <span className={`text-[11px] font-semibold uppercase leading-none tracking-[.06em] ${on ? 'text-white' : 'text-ink-500'}`}>
+                    <span className={`text-[11px] font-semibold uppercase leading-none tracking-[.06em] ${on ? 'text-on-action' : 'text-ink-500'}`}>
                       {i === 0 ? 'Today' : date.toLocaleDateString(undefined, { weekday: 'short' })}
                     </span>
-                    <span className={`text-xl font-semibold leading-none ${on ? 'text-white' : 'text-ink'}`}>{date.getDate()}</span>
+                    <span className={`text-xl font-semibold leading-none ${on ? 'text-on-action' : 'text-ink'}`}>{date.getDate()}</span>
                     <span className="flex h-1.5 gap-[3px]">
                       {items.slice(0, 4).map((r) => (
                         <i key={r.id} className={`size-1.5 rounded-full ${REM_META[r.type].dot}`} />
