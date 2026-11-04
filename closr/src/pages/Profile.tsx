@@ -25,8 +25,8 @@ const h2 = 'text-lg font-semibold leading-[1.3] tracking-[-0.02em] text-ink'
 const sub = 'text-sm leading-[1.45] text-ink-500'
 
 // Prototype `ProfileScreen`. Everything autosaves: buttons and menus at once, text a moment
-// after you stop typing. Left out until their features exist: reminder toggles (Phase 3 /
-// 7.2), email change, data export and account deletion (7.1).
+// after you stop typing. Email change, notification choices, data export and account
+// deletion live in Settings.
 export default function Profile() {
   const { session } = useAuth()
   const { data: profile, isLoading } = useProfile()
@@ -245,7 +245,7 @@ export default function Profile() {
             </div>
           </section>
 
-          {/* Prototype ProfileScreen's "Reminders" card; more toggles arrive with email (7.2). */}
+          {/* Prototype ProfileScreen's "Reminders" card; the other choices are in Settings → Notifications. */}
           <section className={`${card} gap-1.5`}>
             <h2 className={`${h2} mb-2`}>Reminders</h2>
             <div className="flex items-center gap-4 border-t border-paper-200 py-3">

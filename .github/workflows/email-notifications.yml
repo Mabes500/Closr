@@ -1,0 +1,63 @@
+# Email notifications (roadmap 7.2). Every hour, sends what's due through Resend, following
+# each person's settings, time zone and quiet hours. Run it by hand from the Actions tab:
+# "Email notifications" → "Run workflow".
+#
+# Repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   already added for the jobs feed
+#   RESEND_API_KEY                            resend.com → API Keys
+#   EMAIL_FROM                                e.g. Closr <hello@heyclosr.app>, on a domain verified in Resend
+#   EMAIL_UNSUBSCRIBE_SECRET                  a long random value; must match the one in Vercel
+# Until the email secrets exist, each run does nothing and stays green.
+
+name: Email notifications
+
+on:
+  schedule:
+    - cron: '7 * * * *' # every hour, at 7 minutes past
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: count what would go out, but send and save nothing'
+        type: boolean
+        default: false
+      only_email:
+        description: 'Only this account (for testing). Leave empty for everyone.'
+        type: string
+        default: ''
+
+# Never two runs at once.
+concurrency:
+  group: email-notifications
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: closr
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+      EMAIL_UNSUBSCRIBE_SECRET: ${{ secrets.EMAIL_UNSUBSCRIBE_SECRET }}
+      DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+      ONLY_EMAIL: ${{ inputs.only_email }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: closr/package-lock.json
+
+      - run: npm ci --omit=dev --ignore-scripts
+
+      - name: Send what's due
+        run: node scripts/email/send.ts

@@ -333,7 +333,7 @@ function Notifications({ profile, save }: { profile: Profile; save: (p: Partial<
   const prefs = profile.notification_prefs
   return (
     <>
-      <Panel title="What we tell you about" sub="Choose what shows in Closr and what should also reach your inbox. Emails start with a later update; your choices are saved for then.">
+      <Panel title="What we tell you about" sub="Choose what shows in Closr and what should also reach your inbox.">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[420px] border-collapse">
             <thead>

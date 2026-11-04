@@ -6,6 +6,7 @@ import ReminderRow from '../components/ReminderRow'
 import ScheduleDialog, { type ScheduleInit } from '../components/ScheduleDialog'
 import { Button, Card, EmptyState, FilterChip, SectionTitle, TopBar } from '../components/ui'
 import { daysAgo } from '../lib/format'
+import { useProfile } from '../lib/profile'
 import { plusDays, useReminders, whenDue, type ReminderWithApp } from '../lib/reminders'
 import type { ReminderType } from '../lib/types'
 
@@ -34,6 +35,8 @@ const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { weekday: 'short', 
 export default function Schedule() {
   const navigate = useNavigate()
   const { data: rems = [], isLoading, error } = useReminders()
+  const { data: profile } = useProfile()
+  const emailOn = Object.values(profile?.notification_prefs ?? {}).some((c) => c.email)
   const [kind, setKind] = useState<'all' | ReminderType>('all')
   const [day, setDay] = useState<number | null>(null)
   const [showDone, setShowDone] = useState(false)
@@ -186,12 +189,12 @@ export default function Schedule() {
               <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-ink-500">How reminders reach you</span>
               {[
                 { icon: Bell, label: 'In Closr', on: true },
-                { icon: Mail, label: 'Email', on: false },
+                { icon: Mail, label: 'Email', on: emailOn },
               ].map(({ icon: Icon, label, on }) => (
                 <div key={label} className={`flex items-center gap-2.5 text-sm font-medium ${on ? 'text-ink' : 'text-ink-400'}`}>
                   <Icon size={16} className={on ? 'text-blue-600' : 'text-ink-300'} />
                   <span className="flex-1">{label}</span>
-                  <span className={`text-xs font-medium ${on ? 'text-mint-700' : 'text-ink-400'}`}>{on ? 'On' : 'Coming soon'}</span>
+                  <span className={`text-xs font-medium ${on ? 'text-mint-700' : 'text-ink-400'}`}>{on ? 'On' : 'Off'}</span>
                 </div>
               ))}
             </Card>
