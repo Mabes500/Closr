@@ -11,9 +11,6 @@ export default function PublicHeader() {
         <Logo size={26} />
       </Link>
       <div className="flex items-center gap-4 text-sm">
-        <Link to="/blog" className="font-semibold text-ink-700 hover:text-ink">
-          Blog
-        </Link>
         {session ? (
           <Link to="/" className="rounded-xl bg-action px-4 py-2 font-semibold text-on-action hover:bg-action-hover">
             Open Closr
