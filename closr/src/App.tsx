@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
 import { isSupabaseConfigured } from './lib/supabase'
 import AppShell from './components/AppShell'
@@ -20,9 +20,15 @@ import Settings from './pages/Settings'
 import Onboarding from './pages/Onboarding'
 import Profile from './pages/Profile'
 import Import from './pages/Import'
+import { Privacy, Terms } from './pages/Legal'
 import { useProfile } from './lib/profile'
+import { reportError } from './lib/monitoring'
 
-const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } })
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 30_000 } },
+  queryCache: new QueryCache({ onError: reportError }),
+  mutationCache: new MutationCache({ onError: reportError }),
+})
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, loading, authError } = useAuth()
@@ -70,6 +76,8 @@ export default function App() {
             <Route path="/forgot" element={<ForgotPassword />} />
             <Route path="/forgot/sent" element={<ResetSent />} />
             <Route path="/reset" element={<ResetPassword />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route
               path="/welcome"
               element={

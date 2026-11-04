@@ -74,6 +74,6 @@ The plan is in [docs/JOBS-FEED-PLAN.md](JOBS-FEED-PLAN.md): sources and what's e
 ## Phase 7: Settings and launch
 - [x] **7.1 Settings.** Name and email change, password change, Google connect/disconnect, appearance (light default, dark, match device), sessions and sign out other devices, export data (CSV), delete account. Includes the dark-mode toggle in Sidebar (deferred from 0.4, done). Notification choices are saved; email delivery comes with 7.2. Other devices can't be listed from the browser, so only this device and the sign-out buttons show.
 - [x] **7.2 Email notifications.** Via Resend: weekly check-in, interview reminders, quiet hours, per-type toggles. Hourly GitHub Actions job (`.github/workflows/email-notifications.yml`, `scripts/email/`): one email per person per run, deduplicated by `email_log`; also follow-ups, deadlines and reminders, a job-match digest on Mondays and Thursdays, streak milestones and a monthly recap; one-click unsubscribe (`api/unsubscribe.ts`).
-- [ ] **7.3 Launch checks.** Landing page matches the product, privacy policy and terms, error tracking, basic analytics.
+- [x] **7.3 Launch checks.** Landing page matches the product, privacy policy and terms (`src/pages/Legal.tsx`, facts in `src/lib/legal.ts`; need legal review before launch), error tracking with Sentry and a crash screen (`src/lib/monitoring.ts`; on once `VITE_SENTRY_DSN` is set), basic analytics with Vercel Web Analytics (on once enabled in Vercel). Both send no names, emails or job details.
 
 Out of scope for now: email/inbox sync.

@@ -469,6 +469,17 @@ function Privacy({ notify }: { notify: Notify }) {
           </Button>
         </div>
         <Problem>{error}</Problem>
+        <p className="text-sm text-ink-500">
+          Read our{' '}
+          <a href="/privacy" target="_blank" className="font-semibold text-blue-600 hover:underline">
+            Privacy Policy
+          </a>{' '}
+          and{' '}
+          <a href="/terms" target="_blank" className="font-semibold text-blue-600 hover:underline">
+            Terms
+          </a>
+          .
+        </p>
       </Panel>
       <Card className="flex flex-wrap items-center gap-4 border-coral-100 p-6">
         <div className="flex flex-[1_1_260px] flex-col gap-1">

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { CircleAlert, CircleCheck, Info } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Logo } from '../Logo'
 
 export type Banner = { tone: 'success' | 'info'; text: string }
@@ -31,10 +32,15 @@ export default function AuthShell({ children, banner }: { children: ReactNode; b
             {children}
           </div>
         </div>
-        {/* Privacy and Terms pages come with roadmap item 7.3. */}
         <div className="text-xs leading-normal text-ink-400">
-          © {new Date().getFullYear()} Closr · <span className="font-semibold text-blue-600">Privacy</span> ·{' '}
-          <span className="font-semibold text-blue-600">Terms</span>
+          © {new Date().getFullYear()} Closr ·{' '}
+          <Link to="/privacy" className="font-semibold text-blue-600 hover:underline">
+            Privacy
+          </Link>{' '}
+          ·{' '}
+          <Link to="/terms" className="font-semibold text-blue-600 hover:underline">
+            Terms
+          </Link>
         </div>
       </div>
       <AuthArt />

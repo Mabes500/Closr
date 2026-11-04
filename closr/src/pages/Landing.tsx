@@ -1,25 +1,45 @@
+import { BellRing, ChartNoAxesColumn, KanbanSquare, Link2, MessageCircleQuestion, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
-import { Logo, Mark } from '../components/Logo'
+import { Logo } from '../components/Logo'
+import PublicFooter from '../components/PublicFooter'
 
 const columns = [
-  { label: 'Applied', color: 'var(--color-status-applied)', cards: [['Northwind', 'Product Engineer'], ['Kestrel Pay', 'Backend Engineer']] },
-  { label: 'Interviewing', color: 'var(--color-status-interviewing)', cards: [['Brightpath', 'Senior Developer']] },
-  { label: 'Offer', color: 'var(--color-status-offer)', cards: [['Lumen Labs', 'Software Engineer']] },
+  { label: 'Applied', dot: 'bg-status-applied', cards: [['Northwind', 'Product Engineer', 'Follow up Thu'], ['Kestrel Pay', 'Backend Engineer', 'Remote']] },
+  { label: 'Interviewing', dot: 'bg-status-interviewing', cards: [['Brightpath', 'Senior Developer', 'Interview Tue, 14:00']] },
+  { label: 'Offer', dot: 'bg-status-offer', cards: [['Lumen Labs', 'Software Engineer', 'Reply by Fri']] },
 ]
 
 const features = [
   {
+    icon: KanbanSquare,
     title: 'One board for every application',
-    body: 'Add a role in seconds and drag it from Applied to Offer. No spreadsheet, no formulas, no lost tabs.',
+    body: 'Move each role from Saved to Offer with a drag. Every change is timed and recorded for you, with no formulas or lost tabs.',
   },
   {
-    title: 'A timeline that writes itself',
-    body: 'Every status change is recorded automatically, so you always know when you applied and how long they have been quiet.',
+    icon: Link2,
+    title: 'Add jobs in seconds',
+    body: 'Paste a job link and the details fill themselves in, or bring your whole spreadsheet across in a few clicks.',
   },
   {
-    title: 'Numbers that tell you what works',
-    body: 'See your response rate and which sources actually lead to interviews, then spend your time there.',
+    icon: Sparkles,
+    title: 'Matching jobs every day',
+    body: 'New openings from company career pages, matched to your target roles, the countries you can work in and your visa needs.',
+  },
+  {
+    icon: BellRing,
+    title: 'Never miss a follow-up',
+    body: 'Keep interviews, follow-ups and deadlines on one schedule, with reminders in Closr and by email.',
+  },
+  {
+    icon: MessageCircleQuestion,
+    title: 'Check-ins on quiet applications',
+    body: 'When an application has been quiet for a week, one tap records what happened and can set your next follow-up.',
+  },
+  {
+    icon: ChartNoAxesColumn,
+    title: 'See what is working',
+    body: 'Set a weekly goal, keep your streak, and see which sources and CV versions actually get you responses.',
   },
 ]
 
@@ -27,55 +47,56 @@ export default function Landing() {
   // Signed-in visitors skip sign-up and log-in and go straight to the board.
   const { session } = useAuth()
   const start = session ? '/' : '/signup'
-  const signIn = session ? '/' : '/login'
+  const logIn = session ? '/' : '/login'
   return (
-    <div className="min-h-full bg-surface">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+    <div className="min-h-full bg-paper-50">
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-6 py-5">
         <Logo size={26} />
-        <div className="flex items-center gap-3 text-sm">
-          <Link to={signIn} className="font-medium text-ink-muted hover:text-ink">
-            Sign in
+        <div className="flex items-center gap-4 text-sm">
+          <Link to={logIn} className="font-semibold text-ink-700 hover:text-ink">
+            Log in
           </Link>
-          <Link to={start} className="rounded-lg bg-brand px-4 py-2 font-medium text-on-action hover:bg-brand-hover">
+          <Link to={start} className="rounded-xl bg-action px-4 py-2 font-semibold text-on-action hover:bg-action-hover">
             Get started free
           </Link>
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-6 pb-20 pt-14 text-center sm:pt-20">
-        <p className="mx-auto inline-flex items-center gap-2 rounded-full bg-spark-soft px-3 py-1 text-xs font-medium text-ink">
-          <span className="h-1.5 w-1.5 rounded-full bg-spark" />
-          For job seekers applying to remote and international roles
+      <section className="mx-auto max-w-6xl px-6 pb-20 pt-12 text-center sm:pt-20">
+        <p className="mx-auto inline-flex items-center gap-2 rounded-full bg-gold-100 px-3 py-1 text-xs font-semibold text-gold-800">
+          <span className="size-1.5 shrink-0 rounded-full bg-spark" />
+          For people applying to remote and international roles
         </p>
-        <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-semibold tracking-tight sm:text-6xl">
-          Apply widely.<br />
-          <span className="text-brand">Stay on top of it.</span>
+        <h1 className="mx-auto mt-6 max-w-4xl text-[42px] font-bold leading-[1.05] tracking-[-0.03em] text-ink sm:text-[64px]">
+          Apply widely.
+          <br />
+          <span className="text-blue-600">Stay on top of it.</span>
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-lg text-ink-muted">
-          Closr keeps every application, interview and follow-up in one place, so you spend less time tracking and more
-          time closing offers.
+        <p className="mx-auto mt-5 max-w-xl text-lg leading-normal text-ink-500">
+          Closr keeps every application, interview and follow-up in one place, finds new jobs that fit, and shows you what's
+          working.
         </p>
-        <div className="mt-8 flex justify-center gap-3">
-          <Link to={start} className="rounded-lg bg-brand px-6 py-3 font-medium text-on-action hover:bg-brand-hover">
+        <div className="mt-8">
+          <Link to={start} className="inline-block rounded-xl bg-action px-6 py-3 font-semibold text-on-action hover:bg-action-hover">
             Start tracking, it's free
           </Link>
         </div>
 
-        <div className="mx-auto mt-16 max-w-4xl rounded-2xl border border-line bg-canvas p-4 text-left shadow-sm sm:p-6">
-          <div className="grid gap-4 sm:grid-cols-3">
+        <div className="mx-auto mt-16 max-w-4xl rounded-[20px] border border-paper-200 bg-surface p-3 text-left shadow-sm sm:p-5" aria-label="Example board" role="img">
+          <div className="grid gap-3 sm:grid-cols-3">
             {columns.map((col) => (
-              <div key={col.label} className="rounded-xl border border-line bg-surface/70 p-3">
+              <div key={col.label} className="rounded-2xl bg-paper-50 p-3">
                 <div className="mb-3 flex items-center gap-2 px-1">
-                  <span className="h-2 w-2 rounded-full" style={{ background: col.color }} />
-                  <span className="text-sm font-semibold">{col.label}</span>
-                  <span className="font-mono text-xs text-ink-faint">{col.cards.length}</span>
+                  <span className={`size-2 rounded-full ${col.dot}`} />
+                  <span className="text-sm font-semibold text-ink">{col.label}</span>
+                  <span className="font-mono text-xs text-ink-500">{col.cards.length}</span>
                 </div>
                 <div className="flex flex-col gap-2">
-                  {col.cards.map(([company, role]) => (
-                    <div key={company} className="rounded-lg border border-line bg-surface p-3 shadow-sm">
-                      <p className="text-sm font-semibold">{company}</p>
-                      <p className="text-sm text-ink-muted">{role}</p>
-                      <span className="mt-2 inline-block rounded bg-canvas px-1.5 py-0.5 text-xs text-ink-faint">Remote</span>
+                  {col.cards.map(([company, role, note]) => (
+                    <div key={company} className="rounded-xl border border-paper-200 bg-surface p-3">
+                      <p className="text-sm font-semibold text-ink">{role}</p>
+                      <p className="text-[13px] text-ink-500">{company}</p>
+                      <p className="mt-2 font-mono text-xs text-ink-500">{note}</p>
                     </div>
                   ))}
                 </div>
@@ -85,43 +106,31 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="border-t border-line bg-canvas">
-        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-20 sm:grid-cols-3">
-          {features.map((f) => (
-            <div key={f.title}>
-              <h3 className="text-lg font-semibold">{f.title}</h3>
-              <p className="mt-2 text-ink-muted">{f.body}</p>
+      <section className="border-t border-paper-200 bg-surface">
+        <div className="mx-auto grid max-w-6xl gap-x-10 gap-y-12 px-6 py-20 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map(({ icon: Icon, title, body }) => (
+            <div key={title}>
+              <div className="flex size-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                <Icon size={20} />
+              </div>
+              <h2 className="mt-4 text-lg font-semibold tracking-[-0.01em] text-ink">{title}</h2>
+              <p className="mt-2 text-[15px] leading-normal text-ink-500">{body}</p>
             </div>
           ))}
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="rounded-2xl bg-inverse px-8 py-12 text-center sm:px-16">
-          <h2 className="text-3xl font-semibold tracking-tight text-white">Your next offer is in the pipeline.</h2>
-          <p className="mx-auto mt-3 max-w-lg text-white/70">
-            Set up your board in under a minute. Coming soon: goals with next-step recommendations based on what worked
-            for people in your field.
-          </p>
-          <Link
-            to={start}
-            className="mt-8 inline-block rounded-lg bg-spark px-6 py-3 font-medium text-on-spark hover:brightness-95"
-          >
+        <div className="rounded-[28px] bg-oxford-900 px-6 py-12 text-center sm:px-16">
+          <h2 className="text-3xl font-bold tracking-[-0.03em] text-white">Your next offer is in the pipeline.</h2>
+          <p className="mx-auto mt-3 max-w-lg text-white/75">Set up your board in about a minute. Free while you search.</p>
+          <Link to={start} className="mt-8 inline-block rounded-xl bg-spark px-6 py-3 font-semibold text-on-spark hover:brightness-95">
             Get started free
           </Link>
         </div>
       </section>
 
-      <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 text-sm text-ink-faint">
-          <span className="inline-flex items-center gap-2">
-            <Mark size={18} /> © {new Date().getFullYear()} Closr
-          </span>
-          <Link to={signIn} className="hover:text-ink">
-            Sign in
-          </Link>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   )
 }

@@ -66,7 +66,21 @@ export default function Signup() {
   return (
     <AuthShell>
       <AuthHead title="Create your account" sub="Free while you search. Takes about a minute." />
-      <GoogleButton onError={(m) => setErr({ form: m })}>Sign up with Google</GoogleButton>
+      <div className="flex flex-col gap-2">
+        <GoogleButton onError={(m) => setErr({ form: m })}>Sign up with Google</GoogleButton>
+        {/* Google sign-up skips the checkbox below, so it needs its own notice. */}
+        <p className="text-center text-xs leading-normal text-ink-500">
+          By signing up with Google, you agree to the{' '}
+          <Link to="/terms" target="_blank" className={linkClass}>
+            Terms
+          </Link>{' '}
+          and{' '}
+          <Link to="/privacy" target="_blank" className={linkClass}>
+            Privacy Policy
+          </Link>
+          .
+        </p>
+      </div>
       <OrRule />
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         {err.form && <FormError>{err.form}</FormError>}
@@ -105,10 +119,16 @@ export default function Signup() {
         </div>
         <div className="flex flex-col gap-1">
           <Checkbox id="su-agree" checked={d.agree} onChange={(agree) => setD({ ...d, agree })}>
-            {/* Terms and Privacy pages come with roadmap item 7.3. */}
+            {/* New tab, so reading them doesn't lose what's typed in the form. */}
             <span className="text-sm text-ink-700">
-              I agree to the <span className="font-semibold text-blue-600">Terms</span> and{' '}
-              <span className="font-semibold text-blue-600">Privacy Policy</span>
+              I agree to the{' '}
+              <Link to="/terms" target="_blank" className={linkClass}>
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy" target="_blank" className={linkClass}>
+                Privacy Policy
+              </Link>
             </span>
           </Checkbox>
           {err.agree && <span className="pl-[30px] text-xs text-coral-700">{err.agree}</span>}

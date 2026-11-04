@@ -1,6 +1,7 @@
 // The notification email: one message per person per run, grouped by type. Everything from
 // the database is escaped, because job titles and company names come from outside Closr.
 
+import { LEGAL } from '../../src/lib/legal.ts'
 import type { EmailItem, EmailKind } from './rules.ts'
 
 const HEADING: Record<EmailKind, string> = {
@@ -51,7 +52,7 @@ ${list
 </div>
 <div style="max-width:560px;margin:14px auto 0;font-size:12px;line-height:1.5;color:#6B7184;text-align:center">
 You get these because of your Closr notification settings.<br>
-<a href="${escapeHtml(links.settings)}" style="color:#6B7184">Change what you get</a> &middot; <a href="${escapeHtml(links.unsubscribe)}" style="color:#6B7184">Unsubscribe from all emails</a>
+<a href="${escapeHtml(links.settings)}" style="color:#6B7184">Change what you get</a> &middot; <a href="${escapeHtml(links.unsubscribe)}" style="color:#6B7184">Unsubscribe from all emails</a>${LEGAL.postalAddress ? `<br>${escapeHtml(LEGAL.postalAddress)}` : ''}
 </div>
 </body>
 </html>`
@@ -62,6 +63,7 @@ You get these because of your Closr notification settings.<br>
     ]),
     `Change what you get: ${links.settings}`,
     `Unsubscribe from all emails: ${links.unsubscribe}`,
+    ...(LEGAL.postalAddress ? [LEGAL.postalAddress] : []),
   ].join('\n')
   return { html, text }
 }
